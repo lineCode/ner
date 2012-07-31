@@ -25,6 +25,8 @@
 #include <sys/time.h>
 #include <gio/gio.h>
 #include <gmime/gmime.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "email_edit_view.hh"
 #include "view_manager.hh"
@@ -89,8 +91,50 @@ void EmailEditView::createMessage(GMimeMessage * message)
     g_object_unref(message);
 }
 
+static std::string detectCharset(const std::string& filename)
+{
+    int readPipes[2];
+    int writePipes[2];
+
+    pipe(readPipes);
+    pipe(writePipes);
+
+    if (pid_t pid = fork())
+    {
+        close(writePipes[0]);
+        close(writePipes[1]);
+        close(readPipes[1]);
+
+        char buffer[1024];
+        ssize_t count = read(readPipes[0], buffer, 1024);
+        close(readPipes[0]);
+
+        int status;
+        waitpid(pid, &status, 0);
+
+        // remove EOL
+        if (count > 0 and buffer[count-1] == '\n')
+            --count;
+
+        return std::string(buffer, buffer + count);
+    }
+    else
+    {
+        close(readPipes[0]);
+        close(writePipes[1]);
+
+        dup2(readPipes[1], 1);
+        dup2(writePipes[0], 0);
+
+        execlp("file", "file", "-b", "--mime-encoding", filename.c_str(), NULL);
+        exit(0);
+    }
+}
+
 void EmailEditView::send()
 {
+    std::string charset = detectCharset(_messageFile);
+
     /* Add the date to the message */
     FILE * file = fopen(_messageFile.c_str(), "r");
     GMimeStream * stream = g_mime_stream_file_new(file);
@@ -98,6 +142,8 @@ void EmailEditView::send()
     GMimeMessage * message = g_mime_parser_construct_message(parser);
     g_object_unref(parser);
     g_object_unref(stream);
+
+    g_mime_object_set_content_type_parameter((GMimeObject*)message->mime_part, "charset", charset.c_str());
 
     struct timeval timeValue;
     struct timezone timeZone;
