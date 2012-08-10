@@ -31,7 +31,7 @@ AC_DEFUN([AX_PROG_CXX_CXX0X],
                            ac_cv_cxx_compile_cxx0x_native,
                            [
                               AC_LANG_PUSH([C++])
-                              AC_COMPILE_IFELSE(CXX0X_TEST_PROGRAM, ac_cv_cxx_compile_cxx0x_native=yes, ac_cv_cxx_compile_cxx0x_native=no)
+                              AC_COMPILE_IFELSE([AC_LANG_SOURCE(CXX0X_TEST_PROGRAM)], ac_cv_cxx_compile_cxx0x_native=yes, ac_cv_cxx_compile_cxx0x_native=no)
                               AC_LANG_POP([C++])
                            ])
 
@@ -41,7 +41,7 @@ AC_DEFUN([AX_PROG_CXX_CXX0X],
                               AC_LANG_PUSH([C++])
                               ac_save_CXXFLAGS="$CXXFLAGS"
                               CXXFLAGS="$CXXFLAGS -std=c++0x"
-                              AC_COMPILE_IFELSE(CXX0X_TEST_PROGRAM, ac_cv_cxx_compile_cxx0x_cxx=yes, ac_cv_cxx_compile_cxx0x_cxx=no)
+                              AC_COMPILE_IFELSE([AC_LANG_SOURCE(CXX0X_TEST_PROGRAM)], ac_cv_cxx_compile_cxx0x_cxx=yes, ac_cv_cxx_compile_cxx0x_cxx=no)
                               CXXFLAGS="$ac_save_CXXFLAGS"
                               AC_LANG_POP([C++])
                            ])
@@ -52,7 +52,7 @@ AC_DEFUN([AX_PROG_CXX_CXX0X],
                               AC_LANG_PUSH([C++])
                               ac_save_CXXFLAGS="$CXXFLAGS"
                               CXXFLAGS="$CXXFLAGS -std=gnu++0x"
-                              AC_COMPILE_IFELSE(CXX0X_TEST_PROGRAM, ac_cv_cxx_compile_cxx0x_gxx=yes, ac_cv_cxx_compile_cxx0x_gxx=no)
+                              AC_COMPILE_IFELSE([AC_LANG_SOURCE(CXX0X_TEST_PROGRAM)], ac_cv_cxx_compile_cxx0x_gxx=yes, ac_cv_cxx_compile_cxx0x_gxx=no)
                               CXXFLAGS="$ac_save_CXXFLAGS"
                               AC_LANG_POP([C++])
                            ])
