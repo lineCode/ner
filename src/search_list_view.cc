@@ -25,6 +25,8 @@
 #include "ncurses.hh"
 #include "ner_config.hh"
 
+using namespace Notmuch;
+
 const int searchNameWidth = 15;
 const int searchTermsWidth = 30;
 
@@ -82,11 +84,9 @@ void SearchListView::update()
 
             /* Number of Results */
             std::ostringstream results;
-            notmuch_database_t * database = Notmuch::openDatabase();
-            notmuch_query_t * query = notmuch_query_create(database, search->query.c_str());
+            notmuch_query_t * query = notmuch_query_create(Database(), search->query.c_str());
             results << notmuch_query_count_messages(query) << " results";
             notmuch_query_destroy(query);
-            notmuch_database_close(database);
 
             NCurses::addPlainString(_window, results.str(), attributes,
                 ColorID::SearchListViewResults);

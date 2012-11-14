@@ -29,6 +29,40 @@
 
 namespace Notmuch
 {
+    class Database
+    {
+        public:
+            /**
+             * Construct a Database by opening a new database connection.
+             */
+            Database(notmuch_database_mode_t mode);
+
+            /**
+             * Construct a Database using a single shared database connection.
+             *
+             * Note that this connection is not guarded by a mutex and should
+             * only be called from the main thread.
+             */
+            Database();
+
+            ~Database();
+
+            operator notmuch_database_t *() const;
+
+            /**
+             * Reopen all databases, updating to the latest version.
+             */
+            static void reopen();
+
+        private:
+            bool _owner;
+            notmuch_database_t * _database;
+
+            static notmuch_database_t * open(notmuch_database_mode_t mode);
+
+            static notmuch_database_t * _shared_read_only_database;
+    };
+
     class InvalidThreadException : public std::exception
     {
         public:
@@ -141,10 +175,10 @@ namespace Notmuch
         std::vector<Message> replies;
     };
 
-    notmuch_database_t * openDatabase(notmuch_database_mode_t mode = NOTMUCH_DATABASE_MODE_READ_ONLY);
-
     GKeyFile * config();
     void setConfig(const std::string & path);
+
+    const char * path();
 };
 
 #endif

@@ -35,8 +35,7 @@ using namespace Notmuch;
 ThreadView::ThreadView(const std::string & threadId, const View::Geometry & geometry)
     : LineBrowserView(geometry), _id(threadId)
 {
-    notmuch_database_t * database = Notmuch::openDatabase();
-    notmuch_query_t * query = notmuch_query_create(database, ("thread:" + threadId).c_str());
+    notmuch_query_t * query = notmuch_query_create(Database(), ("thread:" + threadId).c_str());
     notmuch_threads_t * threads = notmuch_query_search_threads(query);
     notmuch_thread_t * thread = 0;
     notmuch_messages_t * messages;
@@ -46,7 +45,7 @@ ThreadView::ThreadView(const std::string & threadId, const View::Geometry & geom
         notmuch_threads_destroy(threads);
         notmuch_query_destroy(query);
 
-        throw InvalidThreadException(id);
+        throw InvalidThreadException(threadId);
     }
 
     for (messages = notmuch_thread_get_toplevel_messages(thread);
@@ -59,8 +58,6 @@ ThreadView::ThreadView(const std::string & threadId, const View::Geometry & geom
     notmuch_messages_destroy(messages);
     notmuch_threads_destroy(threads);
     notmuch_query_destroy(query);
-
-    notmuch_database_close(database);
 
     _messageCount = notmuch_thread_get_total_messages(thread);
 

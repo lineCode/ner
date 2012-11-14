@@ -26,6 +26,46 @@ GKeyFile * _config = NULL;
 
 namespace Notmuch
 {
+    notmuch_database_t * Database::_shared_read_only_database = nullptr;
+
+    Database::Database(notmuch_database_mode_t mode)
+        : _owner(true)
+    {
+        _database = open(mode);
+    }
+
+    Database::Database()
+        : _owner(false)
+    {
+        if (_shared_read_only_database == nullptr)
+            _shared_read_only_database = open(NOTMUCH_DATABASE_MODE_READ_ONLY);
+
+        _database = _shared_read_only_database;
+    }
+
+    Database::~Database()
+    {
+        if (_owner)
+            notmuch_database_close(_database);
+    }
+
+    Database::operator notmuch_database_t *() const
+    {
+        return _database;
+    }
+
+    notmuch_database_t * Database::open(notmuch_database_mode_t mode)
+    {
+        notmuch_database_t * database;
+        notmuch_status_t status = notmuch_database_open(path(), mode, &database);
+
+        if (status != NOTMUCH_STATUS_SUCCESS)
+            throw std::runtime_error("Open database failed: "
+                + std::string(notmuch_status_to_string(status)));
+
+        return database;
+    }
+
     InvalidThreadException::InvalidThreadException(const std::string & threadId)
         : _id(threadId)
     {
@@ -111,16 +151,6 @@ namespace Notmuch
         notmuch_messages_destroy(messages);
     }
 
-    notmuch_database_t * openDatabase(notmuch_database_mode_t mode)
-    {
-        notmuch_database_t *db;
-        notmuch_status_t s = notmuch_database_open(g_key_file_get_string(_config, "database", "path", NULL), mode, &db);
-        if (s != NOTMUCH_STATUS_SUCCESS) {
-            throw std::runtime_error("Open database failed: "+std::string(notmuch_status_to_string(s)));
-        }
-        return db;
-    }
-
     GKeyFile * config()
     {
         return _config;
@@ -135,6 +165,11 @@ namespace Notmuch
 
         if (!g_key_file_load_from_file(_config, path.c_str(), G_KEY_FILE_NONE, NULL))
             _config = NULL;
+    }
+
+    const char * path()
+    {
+        return g_key_file_get_string(_config, "database", "path", NULL);
     }
 }
 
