@@ -33,7 +33,7 @@
 ThreadView::ThreadView(const std::string & threadId, const View::Geometry & geometry)
     : LineBrowserView(geometry), _id(threadId)
 {
-    notmuch_database_t * database = NotMuch::openDatabase();
+    notmuch_database_t * database = Notmuch::openDatabase();
     notmuch_query_t * query = notmuch_query_create(database, ("thread:" + threadId).c_str());
     notmuch_threads_t * threads = notmuch_query_search_threads(query);
     notmuch_thread_t * thread = 0;
@@ -46,7 +46,7 @@ ThreadView::ThreadView(const std::string & threadId, const View::Geometry & geom
 
         notmuch_database_close(database);
 
-        throw NotMuch::InvalidThreadException(threadId);
+        throw Notmuch::InvalidThreadException(threadId);
     }
 
     for (messages = notmuch_thread_get_toplevel_messages(thread);
@@ -69,7 +69,7 @@ ThreadView::ThreadView(const std::string & threadId, const View::Geometry & geom
     /* Find first unread message */
     int messageIndex = 0;
 
-    for (NotMuch::Message::const_iterator message(_topMessages.rbegin(), _topMessages.rend()), e;
+    for (Notmuch::Message::const_iterator message(_topMessages.rbegin(), _topMessages.rend()), e;
         message != e; ++message, ++messageIndex)
     {
         if (message->tags.find("unread") != message->tags.end())
@@ -126,15 +126,15 @@ void ThreadView::openSelectedMessage()
         messageView->setMessage(selectedMessage().id);
         ViewManager::instance().addView(messageView);
     }
-    catch (const NotMuch::InvalidMessageException & e)
+    catch (const Notmuch::InvalidMessageException & e)
     {
         StatusBar::instance().displayMessage(e.what());
     }
 }
 
-const NotMuch::Message & ThreadView::selectedMessage() const
+const Notmuch::Message & ThreadView::selectedMessage() const
 {
-    NotMuch::Message::const_iterator message(_topMessages.rbegin(), _topMessages.rend());
+    Notmuch::Message::const_iterator message(_topMessages.rbegin(), _topMessages.rend());
     std::advance(message, _selectedIndex);
     return *message;
 }
@@ -145,7 +145,7 @@ void ThreadView::reply()
     {
         ViewManager::instance().addView(std::make_shared<ReplyView>(selectedMessage().id));
     }
-    catch (const NotMuch::InvalidMessageException & e)
+    catch (const Notmuch::InvalidMessageException & e)
     {
         StatusBar::instance().displayMessage(e.what());
     }
@@ -156,7 +156,7 @@ int ThreadView::lineCount() const
     return _messageCount;
 }
 
-uint32_t ThreadView::displayMessageLine(const NotMuch::Message & message,
+uint32_t ThreadView::displayMessageLine(const Notmuch::Message & message,
     std::vector<chtype> & leading, bool last, int index)
 {
     if (index >= _offset)

@@ -143,7 +143,7 @@ void Ner::openMessage()
             messageView->setMessage(messageId);
             _viewManager.addView(std::move(messageView));
         }
-        catch (const NotMuch::InvalidMessageException & e)
+        catch (const Notmuch::InvalidMessageException & e)
         {
             StatusBar::instance().displayMessage(e.what());
         }
@@ -160,7 +160,7 @@ void Ner::openThread()
         {
             _viewManager.addView(std::make_shared<ThreadView>(threadId));
         }
-        catch (const NotMuch::InvalidThreadException & e)
+        catch (const Notmuch::InvalidThreadException & e)
         {
             _statusBar.displayMessage(e.what());
         }

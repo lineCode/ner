@@ -30,7 +30,7 @@
 ReplyView::ReplyView(const std::string & messageId, const View::Geometry & geometry)
     : EmailEditView(geometry)
 {
-    notmuch_database_t * database = NotMuch::openDatabase();
+    notmuch_database_t * database = Notmuch::openDatabase();
     notmuch_message_t * message;
 
     notmuch_database_find_message(database, messageId.c_str(), &message);
@@ -38,7 +38,7 @@ ReplyView::ReplyView(const std::string & messageId, const View::Geometry & geome
     if (!message)
     {
         notmuch_database_close(database);
-        throw NotMuch::InvalidMessageException(messageId);
+        throw Notmuch::InvalidMessageException(messageId);
     }
 
     FILE * messageFile = fopen(notmuch_message_get_filename(message), "r");

@@ -22,34 +22,34 @@
 
 #include "notmuch.hh"
 
-using namespace NotMuch;
+using namespace Notmuch;
 
 GKeyFile * _config = NULL;
 
-NotMuch::InvalidThreadException::InvalidThreadException(const std::string & threadId)
+Notmuch::InvalidThreadException::InvalidThreadException(const std::string & threadId)
     : _id(threadId)
 {
 }
 
-NotMuch::InvalidThreadException::~InvalidThreadException() throw()
+Notmuch::InvalidThreadException::~InvalidThreadException() throw()
 {
 }
 
-const char * NotMuch::InvalidThreadException::what() const throw()
+const char * Notmuch::InvalidThreadException::what() const throw()
 {
     return ("Cannot find thread with ID: " + _id).c_str();
 }
 
-NotMuch::InvalidMessageException::InvalidMessageException(const std::string & messageId)
+Notmuch::InvalidMessageException::InvalidMessageException(const std::string & messageId)
     : _id(messageId)
 {
 }
 
-NotMuch::InvalidMessageException::~InvalidMessageException() throw()
+Notmuch::InvalidMessageException::~InvalidMessageException() throw()
 {
 }
 
-const char * NotMuch::InvalidMessageException::what() const throw()
+const char * Notmuch::InvalidMessageException::what() const throw()
 {
     return ("Cannot find message with ID: " + _id).c_str();
 }
@@ -111,7 +111,7 @@ Message::Message(notmuch_message_t * message)
     notmuch_messages_destroy(messages);
 }
 
-notmuch_database_t * NotMuch::openDatabase(notmuch_database_mode_t mode)
+notmuch_database_t * Notmuch::openDatabase(notmuch_database_mode_t mode)
 {
     notmuch_database_t *db;
     notmuch_status_t s = notmuch_database_open(g_key_file_get_string(_config, "database", "path", NULL), mode, &db);
@@ -121,12 +121,12 @@ notmuch_database_t * NotMuch::openDatabase(notmuch_database_mode_t mode)
     return db;
 }
 
-GKeyFile * NotMuch::config()
+GKeyFile * Notmuch::config()
 {
     return _config;
 }
 
-void NotMuch::setConfig(const std::string & path)
+void Notmuch::setConfig(const std::string & path)
 {
     if (_config)
         g_object_unref(_config);

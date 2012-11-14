@@ -37,7 +37,7 @@ MessageView::~MessageView()
 
 void MessageView::setMessage(const std::string & messageId)
 {
-    notmuch_database_t * database = NotMuch::openDatabase();
+    notmuch_database_t * database = Notmuch::openDatabase();
     notmuch_message_t * message;
 
     notmuch_database_find_message(database, messageId.c_str(), &message);
@@ -45,7 +45,7 @@ void MessageView::setMessage(const std::string & messageId)
     if (!message)
     {
         notmuch_database_close(database);
-        throw NotMuch::InvalidMessageException(messageId);
+        throw Notmuch::InvalidMessageException(messageId);
     }
 
     std::string filename = notmuch_message_get_filename(message);

@@ -82,7 +82,7 @@ void SearchListView::update()
 
             /* Number of Results */
             std::ostringstream results;
-            notmuch_database_t * database = NotMuch::openDatabase();
+            notmuch_database_t * database = Notmuch::openDatabase();
             notmuch_query_t * query = notmuch_query_create(database, search->query.c_str());
             results << notmuch_query_count_messages(query) << " results";
             notmuch_query_destroy(query);

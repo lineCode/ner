@@ -36,7 +36,7 @@ class ThreadView : public LineBrowserView
         virtual std::string name() const { return "thread-view"; }
         virtual std::vector<std::string> status() const;
 
-        const NotMuch::Message & selectedMessage() const;
+        const Notmuch::Message & selectedMessage() const;
         virtual void openSelectedMessage();
 
         void reply();
@@ -47,10 +47,10 @@ class ThreadView : public LineBrowserView
         std::string _id;
 
     private:
-        uint32_t displayMessageLine(const NotMuch::Message & message,
+        uint32_t displayMessageLine(const Notmuch::Message & message,
             std::vector<chtype> & leading, bool last, int index);
 
-        std::vector<NotMuch::Message> _topMessages;
+        std::vector<Notmuch::Message> _topMessages;
         int _messageCount;
 };
 

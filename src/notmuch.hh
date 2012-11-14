@@ -27,7 +27,7 @@
 #include <notmuch.h>
 #include <glib.h>
 
-namespace NotMuch
+namespace Notmuch
 {
     class InvalidThreadException : public std::exception
     {

@@ -55,7 +55,7 @@ class SearchView : public LineBrowserView
         std::condition_variable _condition;
         bool _collecting;
 
-        std::vector<NotMuch::Thread> _threads;
+        std::vector<Notmuch::Thread> _threads;
 };
 
 #endif

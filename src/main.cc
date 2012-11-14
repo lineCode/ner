@@ -103,7 +103,7 @@ int main(int argc, char * argv[])
 
     try
     {
-        NotMuch::setConfig(configPath);
+        Notmuch::setConfig(configPath);
         NerConfig::instance().load();
 
         if (NerConfig::instance().refreshView())
