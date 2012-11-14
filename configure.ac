@@ -11,8 +11,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
-AX_PROG_CXX_CXX0X(, AC_MSG_ERROR(No C++0x compiler found))
-
+AX_CXX_COMPILE_STDCXX_11
 PKG_PROG_PKG_CONFIG([0.9.0])
 
 dnl Check for libraries {{{

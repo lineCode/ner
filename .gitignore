@@ -25,7 +25,7 @@ Makefile.in
 /ltmain.sh
 /missing
 /m4/*.m4
-!/m4/ax_prog_cxx_cxx0x.m4
+!/m4/ax_cxx_compile_stdcxx_11.m4
 /stamp-h1
 /tags
 
