@@ -29,7 +29,9 @@
 #serial 1
 
 m4_define([_AX_CXX_COMPILE_STDCXX_11_testbody], [
-  template <typename T>
+    #include <initializer_list>
+
+    template <typename T>
     struct check
     {
       static_assert(sizeof(int) <= sizeof(T), "not big enough");
@@ -43,6 +45,13 @@ m4_define([_AX_CXX_COMPILE_STDCXX_11_testbody], [
     typedef check<int> check_type;
     check_type c;
     check_type&& cr = static_cast<check_type&&>(c);
+
+    auto lambda = @<:@@:>@(int x) { return x; };
+
+    void foo()
+    {
+        for (int x : { 1, 2, 3 });
+    }
 ])
 
 AC_DEFUN([AX_CXX_COMPILE_STDCXX_11], [dnl
