@@ -22,119 +22,120 @@
 
 #include "notmuch.hh"
 
-using namespace Notmuch;
-
 GKeyFile * _config = NULL;
 
-Notmuch::InvalidThreadException::InvalidThreadException(const std::string & threadId)
-    : _id(threadId)
+namespace Notmuch
 {
-}
-
-Notmuch::InvalidThreadException::~InvalidThreadException() throw()
-{
-}
-
-const char * Notmuch::InvalidThreadException::what() const throw()
-{
-    return ("Cannot find thread with ID: " + _id).c_str();
-}
-
-Notmuch::InvalidMessageException::InvalidMessageException(const std::string & messageId)
-    : _id(messageId)
-{
-}
-
-Notmuch::InvalidMessageException::~InvalidMessageException() throw()
-{
-}
-
-const char * Notmuch::InvalidMessageException::what() const throw()
-{
-    return ("Cannot find message with ID: " + _id).c_str();
-}
-
-Thread::Thread(notmuch_thread_t * thread)
-    : id(notmuch_thread_get_thread_id(thread)),
-        subject(notmuch_thread_get_subject(thread) ? : "(null)"),
-        authors(notmuch_thread_get_authors(thread) ? : "(null)"),
-        totalMessages(notmuch_thread_get_total_messages(thread)),
-        matchedMessages(notmuch_thread_get_matched_messages(thread)),
-        newestDate(notmuch_thread_get_newest_date(thread)),
-        oldestDate(notmuch_thread_get_oldest_date(thread))
-{
-    notmuch_tags_t * tagIterator;
-
-    for (tagIterator = notmuch_thread_get_tags(thread);
-        notmuch_tags_valid(tagIterator);
-        notmuch_tags_move_to_next(tagIterator))
+    InvalidThreadException::InvalidThreadException(const std::string & threadId)
+        : _id(threadId)
     {
-        tags.insert(notmuch_tags_get(tagIterator));
     }
 
-    notmuch_tags_destroy(tagIterator);
-}
+    InvalidThreadException::~InvalidThreadException() throw()
+    {
+    }
 
-Message::Message(notmuch_message_t * message)
-    : id(notmuch_message_get_message_id(message)),
-        filename(notmuch_message_get_filename(message)),
-        date(notmuch_message_get_date(message)),
-        matched(notmuch_message_get_flag(message, NOTMUCH_MESSAGE_FLAG_MATCH)),
-        headers{
-            {"From",    notmuch_message_get_header(message, "From")     ? : "(null)"},
-            {"To",      notmuch_message_get_header(message, "To")       ? : "(null)"},
-            {"Subject", notmuch_message_get_header(message, "Subject")  ? : "(null)"},
+    const char * InvalidThreadException::what() const throw()
+    {
+        return ("Cannot find thread with ID: " + _id).c_str();
+    }
+
+    InvalidMessageException::InvalidMessageException(const std::string & messageId)
+        : _id(messageId)
+    {
+    }
+
+    InvalidMessageException::~InvalidMessageException() throw()
+    {
+    }
+
+    const char * InvalidMessageException::what() const throw()
+    {
+        return ("Cannot find message with ID: " + _id).c_str();
+    }
+
+    Thread::Thread(notmuch_thread_t * thread)
+        : id(notmuch_thread_get_thread_id(thread)),
+            subject(notmuch_thread_get_subject(thread) ? : "(null)"),
+            authors(notmuch_thread_get_authors(thread) ? : "(null)"),
+            totalMessages(notmuch_thread_get_total_messages(thread)),
+            matchedMessages(notmuch_thread_get_matched_messages(thread)),
+            newestDate(notmuch_thread_get_newest_date(thread)),
+            oldestDate(notmuch_thread_get_oldest_date(thread))
+    {
+        notmuch_tags_t * tagIterator;
+
+        for (tagIterator = notmuch_thread_get_tags(thread);
+            notmuch_tags_valid(tagIterator);
+            notmuch_tags_move_to_next(tagIterator))
+        {
+            tags.insert(notmuch_tags_get(tagIterator));
         }
-{
-    /* Tags */
-    notmuch_tags_t * tagIterator;
 
-    for (tagIterator = notmuch_message_get_tags(message);
-        notmuch_tags_valid(tagIterator);
-        notmuch_tags_move_to_next(tagIterator))
+        notmuch_tags_destroy(tagIterator);
+    }
+
+    Message::Message(notmuch_message_t * message)
+        : id(notmuch_message_get_message_id(message)),
+            filename(notmuch_message_get_filename(message)),
+            date(notmuch_message_get_date(message)),
+            matched(notmuch_message_get_flag(message, NOTMUCH_MESSAGE_FLAG_MATCH)),
+            headers{
+                {"From",    notmuch_message_get_header(message, "From")     ? : "(null)"},
+                {"To",      notmuch_message_get_header(message, "To")       ? : "(null)"},
+                {"Subject", notmuch_message_get_header(message, "Subject")  ? : "(null)"},
+            }
     {
-        tags.insert(notmuch_tags_get(tagIterator));
+        /* Tags */
+        notmuch_tags_t * tagIterator;
+
+        for (tagIterator = notmuch_message_get_tags(message);
+            notmuch_tags_valid(tagIterator);
+            notmuch_tags_move_to_next(tagIterator))
+        {
+            tags.insert(notmuch_tags_get(tagIterator));
+        }
+
+        notmuch_tags_destroy(tagIterator);
+
+        /* Replies */
+        notmuch_messages_t * messages;
+
+        for (messages = notmuch_message_get_replies(message);
+            notmuch_messages_valid(messages);
+            notmuch_messages_move_to_next(messages))
+        {
+            replies.push_back(Message(notmuch_messages_get(messages)));
+        }
+
+        notmuch_messages_destroy(messages);
     }
 
-    notmuch_tags_destroy(tagIterator);
-
-    /* Replies */
-    notmuch_messages_t * messages;
-
-    for (messages = notmuch_message_get_replies(message);
-        notmuch_messages_valid(messages);
-        notmuch_messages_move_to_next(messages))
+    notmuch_database_t * openDatabase(notmuch_database_mode_t mode)
     {
-        replies.push_back(Message(notmuch_messages_get(messages)));
+        notmuch_database_t *db;
+        notmuch_status_t s = notmuch_database_open(g_key_file_get_string(_config, "database", "path", NULL), mode, &db);
+        if (s != NOTMUCH_STATUS_SUCCESS) {
+            throw std::runtime_error("Open database failed: "+std::string(notmuch_status_to_string(s)));
+        }
+        return db;
     }
 
-    notmuch_messages_destroy(messages);
-}
-
-notmuch_database_t * Notmuch::openDatabase(notmuch_database_mode_t mode)
-{
-    notmuch_database_t *db;
-    notmuch_status_t s = notmuch_database_open(g_key_file_get_string(_config, "database", "path", NULL), mode, &db);
-    if (s != NOTMUCH_STATUS_SUCCESS) {
-        throw std::runtime_error("Open database failed: "+std::string(notmuch_status_to_string(s)));
+    GKeyFile * config()
+    {
+        return _config;
     }
-    return db;
-}
 
-GKeyFile * Notmuch::config()
-{
-    return _config;
-}
+    void setConfig(const std::string & path)
+    {
+        if (_config)
+            g_object_unref(_config);
 
-void Notmuch::setConfig(const std::string & path)
-{
-    if (_config)
-        g_object_unref(_config);
+        _config = g_key_file_new();
 
-    _config = g_key_file_new();
-
-    if (!g_key_file_load_from_file(_config, path.c_str(), G_KEY_FILE_NONE, NULL))
-        _config = NULL;
+        if (!g_key_file_load_from_file(_config, path.c_str(), G_KEY_FILE_NONE, NULL))
+            _config = NULL;
+    }
 }
 
 // vim: fdm=syntax fo=croql et sw=4 sts=4 ts=8
