@@ -34,6 +34,12 @@
 
 const std::string notmuchConfigFile(".notmuch-config");
 
+void terminate()
+{
+    NCurses::cleanup();
+    g_mime_shutdown();
+}
+
 void resize(int arg)
 {
     endwin();
@@ -61,6 +67,8 @@ int main(int argc, char * argv[])
     srand(time(NULL));
     g_mime_init(0);
 
+    std::set_terminate(&terminate);
+
     const char * environmentConfigPath = std::getenv("NOTMUCH_CONFIG");
     std::string defaultConfigPath(std::string(std::getenv("HOME")) + "/" + notmuchConfigFile);
 
@@ -71,28 +79,20 @@ int main(int argc, char * argv[])
 
     std::signal(SIGWINCH, &resize);
 
-    try
-    {
-        Notmuch::setConfig(configPath);
-        NerConfig config;
-        config.load();
+    Notmuch::setConfig(configPath);
+    NerConfig config;
+    config.load();
 
-        if (NerConfig::instance().refresh_view)
-            /* Refresh the view every minute (or when the user presses a key). */
-            timeout(60000);
+    if (NerConfig::instance().refresh_view)
+        /* Refresh the view every minute (or when the user presses a key). */
+        timeout(60000);
 
-        Ner ner;
+    Ner ner;
 
-        std::shared_ptr<View> searchListView(new SearchListView());
-        ner.viewManager().addView(searchListView);
+    std::shared_ptr<View> searchListView(new SearchListView());
+    ner.viewManager().addView(searchListView);
 
-        ner.run();
-    }
-    catch (const std::exception & e)
-    {
-        NCurses::cleanup();
-        throw;
-    }
+    ner.run();
 
     NCurses::cleanup();
 
