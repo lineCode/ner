@@ -26,6 +26,8 @@
 #include "ncurses.hh"
 #include "status_bar.hh"
 
+using namespace Notmuch;
+
 MessageView::MessageView(const View::Geometry & geometry)
     : EmailView(geometry)
 {
@@ -45,7 +47,7 @@ void MessageView::setMessage(const std::string & messageId)
     if (!message)
     {
         notmuch_database_close(database);
-        throw Notmuch::InvalidMessageException(messageId);
+        throw InvalidMessageException(messageId);
     }
 
     std::string filename = notmuch_message_get_filename(message);

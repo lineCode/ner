@@ -27,6 +27,8 @@
 #include "util.hh"
 #include "message_part_text_visitor.hh"
 
+using namespace Notmuch;
+
 ReplyView::ReplyView(const std::string & messageId, const View::Geometry & geometry)
     : EmailEditView(geometry)
 {
@@ -38,7 +40,7 @@ ReplyView::ReplyView(const std::string & messageId, const View::Geometry & geome
     if (!message)
     {
         notmuch_database_close(database);
-        throw Notmuch::InvalidMessageException(messageId);
+        throw InvalidMessageException(messageId);
     }
 
     FILE * messageFile = fopen(notmuch_message_get_filename(message), "r");

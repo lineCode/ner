@@ -33,6 +33,8 @@
 #include "notmuch.hh"
 #include "status_bar.hh"
 
+using namespace Notmuch;
+
 const int newestDateWidth = 13;
 const int messageCountWidth = 8;
 const int authorsWidth = 20;
@@ -179,11 +181,11 @@ void SearchView::openSelectedThread()
             ViewManager::instance().addView(std::make_shared<ThreadMessageView>(
                 _threads.at(_selectedIndex).id));
         }
-        catch (const Notmuch::InvalidThreadException & e)
+        catch (const InvalidThreadException & e)
         {
             StatusBar::instance().displayMessage(e.what());
         }
-        catch (const Notmuch::InvalidMessageException & e)
+        catch (const InvalidMessageException & e)
         {
             StatusBar::instance().displayMessage(e.what());
         }

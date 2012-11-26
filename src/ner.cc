@@ -36,6 +36,8 @@
 #include "notmuch.hh"
 #include "line_editor.hh"
 
+using namespace Notmuch;
+
 Ner::Ner()
 {
     /* Key Sequences */
@@ -143,7 +145,7 @@ void Ner::openMessage()
             messageView->setMessage(messageId);
             _viewManager.addView(std::move(messageView));
         }
-        catch (const Notmuch::InvalidMessageException & e)
+        catch (const InvalidMessageException & e)
         {
             StatusBar::instance().displayMessage(e.what());
         }
@@ -160,7 +162,7 @@ void Ner::openThread()
         {
             _viewManager.addView(std::make_shared<ThreadView>(threadId));
         }
-        catch (const Notmuch::InvalidThreadException & e)
+        catch (const InvalidThreadException & e)
         {
             _statusBar.displayMessage(e.what());
         }
