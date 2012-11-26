@@ -38,6 +38,7 @@ class NerConfig
         notmuch_sort_t sort_mode;
         bool refresh_view;
         bool add_signature_dashes;
+        ColorMap color_map;
 
     private:
         NerConfig();

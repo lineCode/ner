@@ -80,8 +80,7 @@ void NerConfig::load()
         { "edit",   "vim +" },
         { "html",   "elinks -dump" }
     };
-
-    ColorMap colorMap = defaultColorMap;
+    color_map = defaultColorMap;
 
     std::string configPath(std::string(getenv("HOME")) + "/" + nerConfigFile);
     std::ifstream configFile(configPath.c_str());
@@ -205,13 +204,9 @@ void NerConfig::load()
             };
 
             for (auto name = colors->begin(), e = colors->end(); name != e; ++name)
-                colorMap[colorNames.at(name.first().to<std::string>())] = name.second().to<ColorPair>();
+                color_map[colorNames.at(name.first().to<std::string>())] = name.second().to<ColorPair>();
         }
     }
-
-    /* Initialize colors from color map. */
-    for (auto color = colorMap.begin(), e = colorMap.end(); color != e; ++color)
-        init_pair(color->first, color->second.foreground, color->second.background);
 }
 
 // vim: fdm=syntax fo=croql et sw=4 sts=4 ts=8

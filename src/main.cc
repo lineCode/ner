@@ -75,13 +75,13 @@ int main(int argc, char * argv[])
     const std::string & configPath = (environmentConfigPath != NULL &&
         access(environmentConfigPath, R_OK) == 0) ? environmentConfigPath : defaultConfigPath;
 
-    NCurses::initialize();
-
-    std::signal(SIGWINCH, &resize);
-
     Notmuch::setConfig(configPath);
     NerConfig config;
     config.load();
+
+    NCurses::initialize(config.color_map);
+
+    std::signal(SIGWINCH, &resize);
 
     if (NerConfig::instance().refresh_view)
         /* Refresh the view every minute (or when the user presses a key). */

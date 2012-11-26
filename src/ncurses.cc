@@ -21,7 +21,7 @@
 
 namespace NCurses
 {
-    void initialize()
+    void initialize(const ColorMap & color_map)
     {
         /* Initialize the screen */
         initscr();
@@ -42,6 +42,10 @@ namespace NCurses
         /* Make the cursor invisible */
         curs_set(0);
         refresh();
+
+        /* Initialize colors from color map. */
+        for (auto color : color_map)
+            init_pair(color.first, color.second.foreground, color.second.background);
     }
 
     void cleanup()

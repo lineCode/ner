@@ -49,7 +49,7 @@ namespace NCurses
      *
      * \param color_map The color map to use.
      */
-    void initialize();
+    void initialize(const ColorMap & color_map);
 
     /**
      * Return screen to normal state.
