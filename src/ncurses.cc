@@ -21,6 +21,34 @@
 
 namespace NCurses
 {
+    void initialize()
+    {
+        /* Initialize the screen */
+        initscr();
+
+        /* Initialize colors */
+        if (has_colors())
+            start_color();
+
+        /* Enable raw input */
+        raw();
+
+        /* Do not echo input */
+        noecho();
+
+        /* Enable keyboard mapping */
+        keypad(stdscr, TRUE);
+
+        /* Make the cursor invisible */
+        curs_set(0);
+        refresh();
+    }
+
+    void cleanup()
+    {
+        endwin();
+    }
+
     CutOffException::~CutOffException() throw ()
     {
     }

@@ -45,6 +45,18 @@
 namespace NCurses
 {
     /**
+     * Initialize the screen for ncurses.
+     *
+     * \param color_map The color map to use.
+     */
+    void initialize();
+
+    /**
+     * Return screen to normal state.
+     */
+    void cleanup();
+
+    /**
      * An exception indicating that a move was attempted past the edge of the
      * screen.
      */
