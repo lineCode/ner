@@ -72,13 +72,13 @@ void SearchListView::update()
         {
             /* Search Name */
             NCurses::addUtf8String(_window, search->name.c_str(), attributes,
-                ColorID::SearchListViewName, searchNameWidth - 1);
+                Color::SearchListViewName, searchNameWidth - 1);
 
             NCurses::checkMove(_window, x += searchNameWidth);
 
             /* Search Terms */
             NCurses::addUtf8String(_window, search->query.c_str(), attributes,
-                ColorID::SearchListViewTerms, searchTermsWidth - 1);
+                Color::SearchListViewTerms, searchTermsWidth - 1);
 
             NCurses::checkMove(_window, x += searchTermsWidth);
 
@@ -89,7 +89,7 @@ void SearchListView::update()
             notmuch_query_destroy(query);
 
             NCurses::addPlainString(_window, results.str(), attributes,
-                ColorID::SearchListViewResults);
+                Color::SearchListViewResults);
 
             NCurses::checkMove(_window, x - 1);
         }

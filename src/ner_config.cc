@@ -27,7 +27,7 @@
 
 const std::string nerConfigFile(".ner.yaml");
 
-void operator>>(const YAML::Node & node, Color & color)
+void operator>>(const YAML::Node & node, ColorPair & color_pair)
 {
     static const std::map<std::string, int> ncursesColors = {
         { "black",      COLOR_BLACK },
@@ -43,8 +43,8 @@ void operator>>(const YAML::Node & node, Color & color)
     std::string foreground = node.FindValue("fg")->to<std::string>();
     std::string background = node.FindValue("bg")->to<std::string>();
 
-    color.foreground = ncursesColors.at(foreground);
-    color.background = ncursesColors.at(background);
+    color_pair.foreground = ncursesColors.at(foreground);
+    color_pair.background = ncursesColors.at(background);
 }
 
 void operator>>(const YAML::Node & node, Search & search)
@@ -82,7 +82,7 @@ void NerConfig::load()
         { "html",   "elinks -dump" }
     };
 
-    std::map<ColorID, Color> colorMap = defaultColorMap;
+    std::map<Color, ColorPair> colorMap = defaultColorMap;
 
     std::string configPath(std::string(getenv("HOME")) + "/" + nerConfigFile);
     std::ifstream configFile(configPath.c_str());
@@ -154,59 +154,59 @@ void NerConfig::load()
         const YAML::Node * colors = document.FindValue("colors");
         if (colors)
         {
-            std::map<std::string, ColorID> colorNames = {
+            std::map<std::string, Color> colorNames = {
                 /* General */
-                { "cut_off_indicator",      ColorID::CutOffIndicator },
-                { "more_less_indicator",    ColorID::MoreLessIndicator },
-                { "empty_space_indicator",  ColorID::EmptySpaceIndicator },
-                { "line_wrap_indicator",    ColorID::LineWrapIndicator },
+                { "cut_off_indicator",      Color::CutOffIndicator },
+                { "more_less_indicator",    Color::MoreLessIndicator },
+                { "empty_space_indicator",  Color::EmptySpaceIndicator },
+                { "line_wrap_indicator",    Color::LineWrapIndicator },
 
                 /* Status Bar */
-                { "status_bar_status",          ColorID::StatusBarStatus },
-                { "status_bar_status_divider",  ColorID::StatusBarStatusDivider },
-                { "status_bar_message",         ColorID::StatusBarMessage },
-                { "status_bar_prompt",          ColorID::StatusBarPrompt },
+                { "status_bar_status",          Color::StatusBarStatus },
+                { "status_bar_status_divider",  Color::StatusBarStatusDivider },
+                { "status_bar_message",         Color::StatusBarMessage },
+                { "status_bar_prompt",          Color::StatusBarPrompt },
 
                 /* Search View */
-                { "search_view_date",                   ColorID::SearchViewDate },
-                { "search_view_message_count_complete", ColorID::SearchViewMessageCountComplete },
-                { "search_view_message_count_partial",  ColorID::SearchViewMessageCountPartial },
-                { "search_view_authors",                ColorID::SearchViewAuthors },
-                { "search_view_subject",                ColorID::SearchViewSubject },
-                { "search_view_tags",                   ColorID::SearchViewTags },
+                { "search_view_date",                   Color::SearchViewDate },
+                { "search_view_message_count_complete", Color::SearchViewMessageCountComplete },
+                { "search_view_message_count_partial",  Color::SearchViewMessageCountPartial },
+                { "search_view_authors",                Color::SearchViewAuthors },
+                { "search_view_subject",                Color::SearchViewSubject },
+                { "search_view_tags",                   Color::SearchViewTags },
 
                 /* Thread View */
-                { "thread_view_arrow",  ColorID::ThreadViewArrow },
-                { "thread_view_date",   ColorID::ThreadViewDate },
-                { "thread_view_tags",   ColorID::ThreadViewTags },
+                { "thread_view_arrow",  Color::ThreadViewArrow },
+                { "thread_view_date",   Color::ThreadViewDate },
+                { "thread_view_tags",   Color::ThreadViewTags },
 
                 /* Email View */
-                { "email_view_header",  ColorID::EmailViewHeader },
+                { "email_view_header",  Color::EmailViewHeader },
 
                 /* View View */
-                { "view_view_number",   ColorID::ViewViewNumber },
-                { "view_view_name",     ColorID::ViewViewName },
-                { "view_view_status",   ColorID::ViewViewStatus },
+                { "view_view_number",   Color::ViewViewNumber },
+                { "view_view_name",     Color::ViewViewName },
+                { "view_view_status",   Color::ViewViewStatus },
 
                 /* Search List View */
-                { "search_list_view_name",      ColorID::SearchListViewName },
-                { "search_list_view_terms",     ColorID::SearchListViewTerms },
-                { "search_list_view_results",   ColorID::SearchListViewTerms },
+                { "search_list_view_name",      Color::SearchListViewName },
+                { "search_list_view_terms",     Color::SearchListViewTerms },
+                { "search_list_view_results",   Color::SearchListViewTerms },
 
                 /* Message Parts */
-                { "attachment_filename",        ColorID::AttachmentFilename },
-                { "attachment_mimetype",        ColorID::AttachmentMimeType },
-                { "attachment_filesize",        ColorID::AttachmentFilesize },
+                { "attachment_filename",        Color::AttachmentFilename },
+                { "attachment_mimetype",        Color::AttachmentMimeType },
+                { "attachment_filesize",        Color::AttachmentFilesize },
 
                 /* Citation levels */
-                { "citation_level_1",           ColorID::CitationLevel1 },
-                { "citation_level_2",           ColorID::CitationLevel2 },
-                { "citation_level_3",           ColorID::CitationLevel3 },
-                { "citation_level_4",           ColorID::CitationLevel4 }
+                { "citation_level_1",           Color::CitationLevel1 },
+                { "citation_level_2",           Color::CitationLevel2 },
+                { "citation_level_3",           Color::CitationLevel3 },
+                { "citation_level_4",           Color::CitationLevel4 }
             };
 
             for (auto name = colors->begin(), e = colors->end(); name != e; ++name)
-                colorMap[colorNames.at(name.first().to<std::string>())] = name.second().to<Color>();
+                colorMap[colorNames.at(name.first().to<std::string>())] = name.second().to<ColorPair>();
         }
     }
 

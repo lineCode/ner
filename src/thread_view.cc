@@ -179,16 +179,16 @@ uint32_t ThreadView::displayMessageLine(const Message & message,
             wchgat(_window, -1, attributes, 0, NULL);
 
             x += NCurses::addPlainString(_window, leading.begin(), leading.end(),
-                attributes, ColorID::ThreadViewArrow);
+                attributes, Color::ThreadViewArrow);
 
             NCurses::checkMove(_window, x);
 
             x += NCurses::addChar(_window, last ? ACS_LLCORNER : ACS_LTEE,
-                attributes, ColorID::ThreadViewArrow);
+                attributes, Color::ThreadViewArrow);
 
             NCurses::checkMove(_window, x);
 
-            x += NCurses::addChar(_window, '>', attributes, ColorID::ThreadViewArrow);
+            x += NCurses::addChar(_window, '>', attributes, Color::ThreadViewArrow);
 
             NCurses::checkMove(_window, ++x);
 
@@ -200,7 +200,7 @@ uint32_t ThreadView::displayMessageLine(const Message & message,
 
             /* Date */
             x += NCurses::addPlainString(_window, relativeTime(message.date),
-                attributes, ColorID::ThreadViewDate);
+                attributes, Color::ThreadViewDate);
 
             NCurses::checkMove(_window, ++x);
 
@@ -214,7 +214,7 @@ uint32_t ThreadView::displayMessageLine(const Message & message,
                 /* Get rid of the trailing space */
                 tags.resize(tags.size() - 1);
 
-            x += NCurses::addPlainString(_window, tags, attributes, ColorID::ThreadViewTags);
+            x += NCurses::addPlainString(_window, tags, attributes, Color::ThreadViewTags);
 
             NCurses::checkMove(_window, x - 1);
         }

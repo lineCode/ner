@@ -35,7 +35,7 @@ StatusBar::StatusBar()
 {
     _instance = this;
 
-    wbkgd(_statusWindow, COLOR_PAIR(ColorID::StatusBarStatus));
+    wbkgd(_statusWindow, COLOR_PAIR(Color::StatusBarStatus));
 
     wrefresh(_statusWindow);
     wrefresh(_promptWindow);
@@ -60,7 +60,7 @@ void StatusBar::update()
 
     /* View Name */
     x += NCurses::addPlainString(_statusWindow, '[' + view.name() + ']',
-        A_BOLD, ColorID::StatusBarStatus);
+        A_BOLD, Color::StatusBarStatus);
 
     /* Status */
     std::vector<std::string> status(view.status());
@@ -71,11 +71,11 @@ void StatusBar::update()
             /* Divider */
             NCurses::checkMove(_statusWindow, ++x);
 
-            x += NCurses::addChar(_statusWindow, '|', A_BOLD, ColorID::StatusBarStatusDivider);
+            x += NCurses::addChar(_statusWindow, '|', A_BOLD, Color::StatusBarStatusDivider);
 
             NCurses::checkMove(_statusWindow, ++x);
 
-            x += NCurses::addPlainString(_statusWindow, *statusItem, 0, ColorID::StatusBarStatus);
+            x += NCurses::addPlainString(_statusWindow, *statusItem, 0, Color::StatusBarStatus);
         }
         catch (const NCurses::CutOffException & e)
         {
@@ -101,7 +101,7 @@ void StatusBar::resize()
 void StatusBar::displayMessage(const std::string & message)
 {
     werase(_promptWindow);
-    wbkgd(_promptWindow, COLOR_PAIR(ColorID::StatusBarMessage));
+    wbkgd(_promptWindow, COLOR_PAIR(Color::StatusBarMessage));
 
     wmove(_promptWindow, 0, (getmaxx(_promptWindow) - message.size()) / 2);
     wattron(_promptWindow, A_BOLD);
@@ -125,12 +125,12 @@ std::string StatusBar::prompt(const std::string & message, const std::string & f
         clearMessage();
 
     wmove(_promptWindow, 0, 0);
-    wattron(_promptWindow, COLOR_PAIR(ColorID::StatusBarPrompt));
+    wattron(_promptWindow, COLOR_PAIR(Color::StatusBarPrompt));
     waddstr(_promptWindow, message.c_str());
     wrefresh(_promptWindow);
 
     auto clearWindow = onScopeEnd([this] { 
-        wattroff(_promptWindow, COLOR_PAIR(ColorID::StatusBarPrompt));
+        wattroff(_promptWindow, COLOR_PAIR(Color::StatusBarPrompt));
 
         /* Clear the prompt window after we're done */
         werase(_promptWindow);
@@ -157,7 +157,7 @@ void StatusBar::delayedClearMessage(int delay)
 void StatusBar::clearMessage()
 {
     werase(_promptWindow);
-    wbkgd(_promptWindow, COLOR_PAIR(ColorID::StatusBarPrompt));
+    wbkgd(_promptWindow, COLOR_PAIR(Color::StatusBarPrompt));
     wrefresh(_promptWindow);
     _messageCleared = true;
 }

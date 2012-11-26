@@ -45,7 +45,7 @@ void MessagePartDisplayVisitor::visit(const TextPart & part)
 
         attr_t attributes = 0;
         x += NCurses::addChar(_window, part.folded ? '+' : '-',
-                              A_BOLD | attributes, ColorID::AttachmentFilename);
+                              A_BOLD | attributes, Color::AttachmentFilename);
         NCurses::checkMove(_window, ++x);
 
         if (selected)
@@ -58,7 +58,7 @@ void MessagePartDisplayVisitor::visit(const TextPart & part)
         NCurses::checkMove(_window, x);
 
         x += NCurses::addPlainString(_window, part.contentType, attributes,
-                                     ColorID::AttachmentMimeType);
+                                     Color::AttachmentMimeType);
         NCurses::checkMove(_window, x - 1);
         ++_messageRow;
     }
@@ -76,15 +76,15 @@ void MessagePartDisplayVisitor::visit(const TextPart & part)
                 break;
         }
 
-        ColorID color = None;
+        Color color = None;
         if (citationLevel)
         {
             switch (citationLevel % 4)
             {
-                case 1: color = ColorID::CitationLevel1; break;
-                case 2: color = ColorID::CitationLevel2; break;
-                case 3: color = ColorID::CitationLevel3; break;
-                case 0: color = ColorID::CitationLevel4; break;
+                case 1: color = Color::CitationLevel1; break;
+                case 2: color = Color::CitationLevel2; break;
+                case 3: color = Color::CitationLevel3; break;
+                case 0: color = Color::CitationLevel4; break;
             }
         }
 
@@ -99,7 +99,7 @@ void MessagePartDisplayVisitor::visit(const TextPart & part)
                 continue;
 
             if (wrapped)
-                mvwaddch(_window, _row, _area.x, ACS_CKBOARD | COLOR_PAIR(ColorID::LineWrapIndicator));
+                mvwaddch(_window, _row, _area.x, ACS_CKBOARD | COLOR_PAIR(Color::LineWrapIndicator));
 
             wmove(_window, _row, _area.x + 2);
 
@@ -136,7 +136,7 @@ void MessagePartDisplayVisitor::visit(const Attachment & part)
 
             attr_t attributes = 0;
 
-            x += NCurses::addChar(_window, '*', A_BOLD | attributes, ColorID::AttachmentFilename);
+            x += NCurses::addChar(_window, '*', A_BOLD | attributes, Color::AttachmentFilename);
             NCurses::checkMove(_window, ++x);
 
             if (selected)
@@ -149,15 +149,15 @@ void MessagePartDisplayVisitor::visit(const Attachment & part)
             NCurses::checkMove(_window, x);
 
             x += NCurses::addUtf8String(_window, part.filename.c_str(), attributes,
-                ColorID::AttachmentFilename);
+                Color::AttachmentFilename);
             NCurses::checkMove(_window, ++x);
 
             x += NCurses::addPlainString(_window, part.contentType, attributes,
-                ColorID::AttachmentMimeType);
+                Color::AttachmentMimeType);
             NCurses::checkMove(_window, ++x);
 
             x += NCurses::addPlainString(_window, formatByteSize(part.filesize), attributes,
-                ColorID::AttachmentFilesize);
+                Color::AttachmentFilesize);
 
             NCurses::checkMove(_window, x - 1);
         }

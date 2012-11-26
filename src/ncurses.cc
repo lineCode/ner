@@ -39,23 +39,23 @@ void NCurses::checkMove(WINDOW * window, int x)
 void NCurses::addCutOffIndicator(WINDOW * window, attr_t attributes)
 {
     wmove(window, getcury(window), getmaxx(window) - 1);
-    waddch(window, '$' | attributes | COLOR_PAIR(ColorID::CutOffIndicator));
+    waddch(window, '$' | attributes | COLOR_PAIR(Color::CutOffIndicator));
 }
 
 int NCurses::addPlainString(WINDOW * window, const std::string & string,
-    attr_t attributes, ColorID color, int maxLength)
+    attr_t attributes, Color color, int maxLength)
 {
     return addPlainString(window, string.begin(), string.end(), attributes, color, maxLength);
 }
 
 int NCurses::addPlainString(WINDOW * window, const char * string,
-    attr_t attributes, ColorID color, int maxLength)
+    attr_t attributes, Color color, int maxLength)
 {
     return addPlainString(window, string, string + std::strlen(string), attributes, color, maxLength);
 }
 
 int NCurses::addUtf8String(WINDOW * window, const char * string,
-    attr_t attributes, ColorID color, int maxLength)
+    attr_t attributes, Color color, int maxLength)
 {
     mbstate_t state = { 0 };
 
@@ -121,7 +121,7 @@ int NCurses::addUtf8String(WINDOW * window, const char * string,
     return displayLength;
 }
 
-int NCurses::addChar(WINDOW * window, chtype character, int attributes, ColorID color)
+int NCurses::addChar(WINDOW * window, chtype character, int attributes, Color color)
 {
     character |= attributes | COLOR_PAIR(color);
     waddchnstr(window, &character, 1);

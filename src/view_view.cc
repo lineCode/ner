@@ -73,20 +73,20 @@ void ViewView::update()
         std::ostringstream numberStream;
         numberStream << row + _offset << ".";
         x += NCurses::addPlainString(_window, numberStream.str(),
-            attributes, ColorID::ViewViewNumber);
+            attributes, Color::ViewViewNumber);
 
         NCurses::checkMove(_window, ++x);
 
         /* Name */
         NCurses::addPlainString(_window, (*view)->name(),
-            attributes, ColorID::ViewViewName, nameWidth - 1);
+            attributes, Color::ViewViewName, nameWidth - 1);
 
         NCurses::checkMove(_window, x = nameWidth);
 
         /* Status */
         std::vector<std::string> status((*view)->status());
         if (status.size() > 0)
-            NCurses::addPlainString(_window, status.at(0), attributes, ColorID::ViewViewStatus);
+            NCurses::addPlainString(_window, status.at(0), attributes, Color::ViewViewStatus);
     }
 }
 

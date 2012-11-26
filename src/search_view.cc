@@ -101,7 +101,7 @@ void SearchView::update()
         {
             /* Date */
             NCurses::addPlainString(_window, relativeTime(thread->newestDate),
-                attributes, ColorID::SearchViewDate, newestDateWidth - 1);
+                attributes, Color::SearchViewDate, newestDateWidth - 1);
 
             NCurses::checkMove(_window, x += newestDateWidth);
 
@@ -113,8 +113,8 @@ void SearchView::update()
             NCurses::checkMove(_window, x);
 
             x += NCurses::addPlainString(_window, messageCountStream.str(),
-                attributes, completeMatch ? ColorID::SearchViewMessageCountComplete :
-                                            ColorID::SearchViewMessageCountPartial,
+                attributes, completeMatch ? Color::SearchViewMessageCountComplete :
+                                            Color::SearchViewMessageCountPartial,
                 messageCountWidth - 1);
             NCurses::checkMove(_window, x);
 
@@ -124,13 +124,13 @@ void SearchView::update()
 
             /* Authors */
             NCurses::addUtf8String(_window, thread->authors.c_str(),
-                attributes, ColorID::SearchViewAuthors, authorsWidth - 1);
+                attributes, Color::SearchViewAuthors, authorsWidth - 1);
 
             NCurses::checkMove(_window, x += authorsWidth);
 
             /* Subject */
             x += NCurses::addUtf8String(_window, thread->subject.c_str(),
-                attributes, ColorID::SearchViewSubject);
+                attributes, Color::SearchViewSubject);
 
             NCurses::checkMove(_window, ++x);
 
@@ -144,7 +144,7 @@ void SearchView::update()
                 /* Get rid of the trailing space */
                 tags.resize(tags.size() - 1);
 
-            x += NCurses::addPlainString(_window, tags, attributes, ColorID::SearchViewTags);
+            x += NCurses::addPlainString(_window, tags, attributes, Color::SearchViewTags);
 
             NCurses::checkMove(_window, x - 1);
         }

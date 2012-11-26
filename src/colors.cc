@@ -21,55 +21,55 @@
 
 #include "colors.hh"
 
-std::map<ColorID, Color> defaultColorMap = {
+std::map<Color, ColorPair> defaultColorMap = {
     /* General */
-    { ColorID::CutOffIndicator,         Color{ COLOR_GREEN,  COLOR_BLACK } },
-    { ColorID::MoreLessIndicator,       Color{ COLOR_BLACK,  COLOR_GREEN } },
-    { ColorID::EmptySpaceIndicator,     Color{ COLOR_CYAN,   COLOR_BLACK } },
-    { ColorID::LineWrapIndicator,       Color{ COLOR_GREEN,  COLOR_BLACK } },
+    { Color::CutOffIndicator,           ColorPair{ COLOR_GREEN,  COLOR_BLACK } },
+    { Color::MoreLessIndicator,         ColorPair{ COLOR_BLACK,  COLOR_GREEN } },
+    { Color::EmptySpaceIndicator,       ColorPair{ COLOR_CYAN,   COLOR_BLACK } },
+    { Color::LineWrapIndicator,         ColorPair{ COLOR_GREEN,  COLOR_BLACK } },
 
     /* Status Bar */
-    { ColorID::StatusBarStatus,         Color{ COLOR_WHITE,  COLOR_BLUE } },
-    { ColorID::StatusBarStatusDivider,  Color{ COLOR_WHITE,  COLOR_BLUE } },
-    { ColorID::StatusBarMessage,        Color{ COLOR_BLACK,  COLOR_WHITE } },
-    { ColorID::StatusBarPrompt,         Color{ COLOR_WHITE,  COLOR_BLACK } },
+    { Color::StatusBarStatus,           ColorPair{ COLOR_WHITE,  COLOR_BLUE } },
+    { Color::StatusBarStatusDivider,    ColorPair{ COLOR_WHITE,  COLOR_BLUE } },
+    { Color::StatusBarMessage,          ColorPair{ COLOR_BLACK,  COLOR_WHITE } },
+    { Color::StatusBarPrompt,           ColorPair{ COLOR_WHITE,  COLOR_BLACK } },
 
     /* Search View */
-    { ColorID::SearchViewDate,                  Color{ COLOR_YELLOW,     COLOR_BLACK } },
-    { ColorID::SearchViewMessageCountComplete,  Color{ COLOR_GREEN,      COLOR_BLACK } },
-    { ColorID::SearchViewMessageCountPartial,   Color{ COLOR_MAGENTA,    COLOR_BLACK } },
-    { ColorID::SearchViewAuthors,               Color{ COLOR_CYAN,       COLOR_BLACK } },
-    { ColorID::SearchViewSubject,               Color{ COLOR_WHITE,      COLOR_BLACK } },
-    { ColorID::SearchViewTags,                  Color{ COLOR_RED,        COLOR_BLACK } },
+    { Color::SearchViewDate,                    ColorPair{ COLOR_YELLOW,     COLOR_BLACK } },
+    { Color::SearchViewMessageCountComplete,    ColorPair{ COLOR_GREEN,      COLOR_BLACK } },
+    { Color::SearchViewMessageCountPartial,     ColorPair{ COLOR_MAGENTA,    COLOR_BLACK } },
+    { Color::SearchViewAuthors,                 ColorPair{ COLOR_CYAN,       COLOR_BLACK } },
+    { Color::SearchViewSubject,                 ColorPair{ COLOR_WHITE,      COLOR_BLACK } },
+    { Color::SearchViewTags,                    ColorPair{ COLOR_RED,        COLOR_BLACK } },
 
     /* ThreadView */
-    { ColorID::ThreadViewArrow, Color{ COLOR_GREEN,  COLOR_BLACK } },
-    { ColorID::ThreadViewDate,  Color{ COLOR_CYAN,   COLOR_BLACK } },
-    { ColorID::ThreadViewTags,  Color{ COLOR_RED,    COLOR_BLACK } },
+    { Color::ThreadViewArrow,   ColorPair{ COLOR_GREEN,  COLOR_BLACK } },
+    { Color::ThreadViewDate,    ColorPair{ COLOR_CYAN,   COLOR_BLACK } },
+    { Color::ThreadViewTags,    ColorPair{ COLOR_RED,    COLOR_BLACK } },
 
     /* Email View */
-    { ColorID::EmailViewHeader, Color{ COLOR_CYAN, COLOR_BLACK } },
+    { Color::EmailViewHeader,   ColorPair{ COLOR_CYAN, COLOR_BLACK } },
 
     /* View View */
-    { ColorID::ViewViewNumber,  Color{ COLOR_CYAN,   COLOR_BLACK } },
-    { ColorID::ViewViewName,    Color{ COLOR_GREEN,  COLOR_BLACK } },
-    { ColorID::ViewViewStatus,  Color{ COLOR_WHITE,  COLOR_BLACK } },
+    { Color::ViewViewNumber,    ColorPair{ COLOR_CYAN,   COLOR_BLACK } },
+    { Color::ViewViewName,      ColorPair{ COLOR_GREEN,  COLOR_BLACK } },
+    { Color::ViewViewStatus,    ColorPair{ COLOR_WHITE,  COLOR_BLACK } },
 
     /* Search List View */
-    { ColorID::SearchListViewName,      Color{ COLOR_CYAN,   COLOR_BLACK } },
-    { ColorID::SearchListViewTerms,     Color{ COLOR_YELLOW, COLOR_BLACK } },
-    { ColorID::SearchListViewResults,   Color{ COLOR_GREEN,  COLOR_BLACK } },
+    { Color::SearchListViewName,    ColorPair{ COLOR_CYAN,   COLOR_BLACK } },
+    { Color::SearchListViewTerms,   ColorPair{ COLOR_YELLOW, COLOR_BLACK } },
+    { Color::SearchListViewResults, ColorPair{ COLOR_GREEN,  COLOR_BLACK } },
 
     /* Message Parts */
-    { ColorID::AttachmentFilename,      Color{ COLOR_YELLOW,  COLOR_BLACK } },
-    { ColorID::AttachmentMimeType,      Color{ COLOR_MAGENTA, COLOR_BLACK } },
-    { ColorID::AttachmentFilesize,      Color{ COLOR_GREEN,   COLOR_BLACK } },
+    { Color::AttachmentFilename,    ColorPair{ COLOR_YELLOW,  COLOR_BLACK } },
+    { Color::AttachmentMimeType,    ColorPair{ COLOR_MAGENTA, COLOR_BLACK } },
+    { Color::AttachmentFilesize,    ColorPair{ COLOR_GREEN,   COLOR_BLACK } },
 
     /* Citation levels */
-    { ColorID::CitationLevel1, Color{ COLOR_GREEN,   COLOR_BLACK } },
-    { ColorID::CitationLevel2, Color{ COLOR_YELLOW,  COLOR_BLACK } },
-    { ColorID::CitationLevel3, Color{ COLOR_CYAN,    COLOR_BLACK } },
-    { ColorID::CitationLevel4, Color{ COLOR_MAGENTA, COLOR_BLACK } }
+    { Color::CitationLevel1,    ColorPair{ COLOR_GREEN,   COLOR_BLACK } },
+    { Color::CitationLevel2,    ColorPair{ COLOR_YELLOW,  COLOR_BLACK } },
+    { Color::CitationLevel3,    ColorPair{ COLOR_CYAN,    COLOR_BLACK } },
+    { Color::CitationLevel4,    ColorPair{ COLOR_MAGENTA, COLOR_BLACK } }
 };
 
 // vim: fdm=syntax fo=croql et sw=4 sts=4 ts=8

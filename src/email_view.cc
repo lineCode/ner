@@ -101,7 +101,7 @@ void EmailView::update()
         try
         {
             x += NCurses::addPlainString(_window, (*header) + ": ",
-                0, ColorID::EmailViewHeader);
+                0, Color::EmailViewHeader);
 
             NCurses::checkMove(_window, x);
 
@@ -133,9 +133,9 @@ void EmailView::update()
     _lineCount = displayVisitor.lines();
 
     for (; row < getmaxy(_window); ++row)
-        mvwaddch(_window, row, 0, '~' | A_BOLD | COLOR_PAIR(ColorID::EmptySpaceIndicator));
+        mvwaddch(_window, row, 0, '~' | A_BOLD | COLOR_PAIR(Color::EmptySpaceIndicator));
 
-    wattron(_window, COLOR_PAIR(ColorID::MoreLessIndicator));
+    wattron(_window, COLOR_PAIR(Color::MoreLessIndicator));
 
     if (_offset > 0)
         mvwaddstr(_window, _visibleHeaders.size() + 1, _geometry.width - lessMessage.size(), lessMessage.c_str());
@@ -143,7 +143,7 @@ void EmailView::update()
     if (_offset + visibleLines() < _lineCount)
         mvwaddstr(_window, getmaxy(_window) - 1, _geometry.width - moreMessage.size(), moreMessage.c_str());
 
-    wattroff(_window, COLOR_PAIR(ColorID::MoreLessIndicator));
+    wattroff(_window, COLOR_PAIR(Color::MoreLessIndicator));
 }
 
 EmailView::PartList::iterator EmailView::selectedPart()

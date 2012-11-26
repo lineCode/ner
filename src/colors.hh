@@ -22,7 +22,7 @@
 
 #include <map>
 
-enum ColorID
+enum Color
 {
     None = 0,
 
@@ -76,13 +76,13 @@ enum ColorID
     CitationLevel4
 };
 
-struct Color
+struct ColorPair
 {
     int foreground;
     int background;
 };
 
-extern std::map<ColorID, Color> defaultColorMap;
+extern std::map<Color, ColorPair> defaultColorMap;
 
 #endif
 
