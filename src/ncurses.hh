@@ -89,7 +89,7 @@ namespace NCurses
      */
     template <class InputIterator>
         int addPlainString(WINDOW * window, InputIterator first, InputIterator last,
-            attr_t attributes = 0, short color = 0, int maxLength = std::numeric_limits<int>::max())
+            attr_t attributes = 0, ColorID color = None, int maxLength = std::numeric_limits<int>::max())
     {
         int distance = std::distance(first, last);
         chtype characters[distance];
@@ -108,13 +108,13 @@ namespace NCurses
      * \overload
      */
     int addPlainString(WINDOW * window, const std::string & string,
-        attr_t attributes = 0, short color = 0, int maxLength = std::numeric_limits<int>::max());
+        attr_t attributes = 0, ColorID color = None, int maxLength = std::numeric_limits<int>::max());
 
     /**
      * \overload
      */
     int addPlainString(WINDOW * window, const char * string,
-        attr_t attributes = 0, short color = 0, int maxLength = std::numeric_limits<int>::max());
+        attr_t attributes = 0, ColorID color = None, int maxLength = std::numeric_limits<int>::max());
 
     /**
      * Adds a UTF-8 string to the window.
@@ -129,7 +129,7 @@ namespace NCurses
      * \param maxLength The maximum number of columns the string should take up.
      */
     int addUtf8String(WINDOW * window, const char * string,
-        attr_t attributes = 0, short color = 0, int maxLength = std::numeric_limits<int>::max());
+        attr_t attributes = 0, ColorID color = None, int maxLength = std::numeric_limits<int>::max());
 
     /**
      * Adds a single character to the window.
@@ -142,7 +142,7 @@ namespace NCurses
      * \param color The color of the character.
      */
     int addChar(WINDOW * window, chtype character,
-        int attributes = 0, short color = 0);
+        int attributes = 0, ColorID color = None);
 };
 
 #endif

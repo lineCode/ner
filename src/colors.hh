@@ -24,8 +24,10 @@
 
 enum ColorID
 {
+    None = 0,
+
     /* General */
-    CutOffIndicator = 1,
+    CutOffIndicator,
     MoreLessIndicator,
     EmptySpaceIndicator,
     LineWrapIndicator,

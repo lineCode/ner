@@ -76,7 +76,7 @@ void MessagePartDisplayVisitor::visit(const TextPart & part)
                 break;
         }
 
-        short color = 0;
+        ColorID color = None;
         if (citationLevel)
         {
             switch (citationLevel % 4)
