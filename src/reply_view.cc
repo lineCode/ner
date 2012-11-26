@@ -165,7 +165,7 @@ ReplyView::ReplyView(const std::string & messageId, const View::Geometry & geome
     /* Read user's signature */
     if (!_identity->signaturePath.empty())
     {
-        if (NerConfig::instance().addSigDashes())
+        if (NerConfig::instance().add_signature_dashes)
             messageContentStream << std::endl << "-- ";
 
         messageContentStream << std::endl;

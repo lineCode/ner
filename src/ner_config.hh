@@ -33,25 +33,15 @@ class NerConfig
 
         void load();
 
-        const std::map<std::string, std::string> & commands() const;
-
-        const std::vector<Search> & searches() const;
-
-        notmuch_sort_t sortMode() const;
-
-        bool refreshView() const;
-
-        bool addSigDashes() const;
+        std::map<std::string, std::string> commands;
+        std::vector<Search> searches;
+        notmuch_sort_t sort_mode;
+        bool refresh_view;
+        bool add_signature_dashes;
 
     private:
         NerConfig();
         ~NerConfig();
-
-        std::map<std::string, std::string> _commands;
-        std::vector<Search> _searches;
-        notmuch_sort_t _sortMode;
-        bool _refreshView;
-        bool _addSigDashes;
 };
 
 #endif

@@ -53,7 +53,7 @@ ComposeView::ComposeView(const View::Geometry & geometry)
     /* Read the user's signature */
     if (!_identity->signaturePath.empty())
     {
-        if (NerConfig::instance().addSigDashes())
+        if (NerConfig::instance().add_signature_dashes)
             messageContentStream << std::endl << "-- ";
 
         messageContentStream << std::endl;

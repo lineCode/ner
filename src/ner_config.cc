@@ -73,10 +73,11 @@ NerConfig::~NerConfig()
 
 void NerConfig::load()
 {
-    _sortMode = NOTMUCH_SORT_NEWEST_FIRST;
-    _refreshView = true;
-    _addSigDashes = true;
-    _commands = {
+    /* Reset configuration to default values. */
+    sort_mode = NOTMUCH_SORT_NEWEST_FIRST;
+    refresh_view = true;
+    add_signature_dashes = true;
+    commands = {
         { "send",   "/usr/sbin/sendmail -t" },
         { "edit",   "vim +" },
         { "html",   "elinks -dump" }
@@ -114,9 +115,9 @@ void NerConfig::load()
                 *sortModeNode >> sortModeStr;
 
                 if (sortModeStr == std::string("oldest_first"))
-                    _sortMode = NOTMUCH_SORT_OLDEST_FIRST;
+                    sort_mode = NOTMUCH_SORT_OLDEST_FIRST;
                 else if (sortModeStr == std::string("message_id"))
-                    _sortMode = NOTMUCH_SORT_MESSAGE_ID;
+                    sort_mode = NOTMUCH_SORT_MESSAGE_ID;
                 else if (sortModeStr != std::string("newest_first"))
                 {
                     /* FIXME: throw? */
@@ -126,25 +127,25 @@ void NerConfig::load()
             auto refreshViewNode = general->FindValue("refresh_view");
 
             if (refreshViewNode)
-                *refreshViewNode >> _refreshView;
+                *refreshViewNode >> refresh_view;
 
             auto addSigDashesNode = general->FindValue("add_sig_dashes");
 
             if (addSigDashesNode)
-                *addSigDashesNode >> _addSigDashes;
+                *addSigDashesNode >> add_signature_dashes;
         }
 
         /* Commands */
-        const YAML::Node * commands = document.FindValue("commands");
-        if (commands)
-            commands->Read(_commands);
+        const YAML::Node * commands_node = document.FindValue("commands");
+        if (commands_node)
+            commands_node->Read(commands);
 
         /* Saved Searches */
-        const YAML::Node * searches = document.FindValue("searches");
-        if (searches)
-            searches->Read(_searches);
+        const YAML::Node * searches_node = document.FindValue("searches");
+        if (searches_node)
+            searches_node->Read(searches);
         else
-            _searches = {
+            searches = {
                 { "New", "tag:inbox and tag:unread" },
                 { "Unread", "tag:unread" },
                 { "Inbox", "tag:inbox" }
@@ -213,31 +214,6 @@ void NerConfig::load()
     /* Initialize colors from color map. */
     for (auto color = colorMap.begin(), e = colorMap.end(); color != e; ++color)
         init_pair(color->first, color->second.foreground, color->second.background);
-}
-
-const std::map<std::string, std::string> & NerConfig::commands() const
-{
-    return _commands;
-}
-
-const std::vector<Search> & NerConfig::searches() const
-{
-    return _searches;
-}
-
-notmuch_sort_t NerConfig::sortMode() const
-{
-    return _sortMode;
-}
-
-bool NerConfig::refreshView() const
-{
-    return _refreshView;
-}
-
-bool NerConfig::addSigDashes() const
-{
-    return _addSigDashes;
 }
 
 // vim: fdm=syntax fo=croql et sw=4 sts=4 ts=8

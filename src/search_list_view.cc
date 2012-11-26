@@ -32,7 +32,7 @@ const int searchTermsWidth = 30;
 
 SearchListView::SearchListView(const View::Geometry & geometry)
     : LineBrowserView(geometry),
-        _searches(NerConfig::instance().searches())
+        _searches(NerConfig::instance().searches)
 {
     /* Key Sequences */
     addHandledSequence("\n", std::bind(&SearchListView::openSelectedSearch, this));
