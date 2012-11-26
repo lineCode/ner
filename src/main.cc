@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
-#include <clocale>
+#include <locale>
 #include <csignal>
 #include <unistd.h>
 #include <gmime/gmime.h>
@@ -62,7 +62,7 @@ void resize(int arg)
 
 int main(int argc, char * argv[])
 {
-    std::setlocale(LC_ALL, "");
+    std::locale::global(std::locale(""));
 
     srand(time(NULL));
     g_mime_init(0);
