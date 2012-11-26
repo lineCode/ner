@@ -29,7 +29,7 @@
 class NerConfig
 {
     public:
-        static NerConfig & instance();
+        static const NerConfig & instance();
 
         void load();
 
@@ -42,6 +42,10 @@ class NerConfig
     private:
         NerConfig();
         ~NerConfig();
+
+        static const NerConfig * _instance;
+
+    friend int main(int, char **);
 };
 
 #endif

@@ -74,7 +74,8 @@ int main(int argc, char * argv[])
     try
     {
         Notmuch::setConfig(configPath);
-        NerConfig::instance().load();
+        NerConfig config;
+        config.load();
 
         if (NerConfig::instance().refresh_view)
             /* Refresh the view every minute (or when the user presses a key). */

@@ -53,18 +53,16 @@ void operator>>(const YAML::Node & node, Search & search)
     node.FindValue("query")->Read(search.query);
 }
 
-NerConfig & NerConfig::instance()
+const NerConfig * NerConfig::_instance = nullptr;
+
+const NerConfig & NerConfig::instance()
 {
-    static NerConfig * config = NULL;
-
-    if (!config)
-        config = new NerConfig();
-
-    return *config;
+    return *_instance;
 }
 
 NerConfig::NerConfig()
 {
+    _instance = this;
 }
 
 NerConfig::~NerConfig()
