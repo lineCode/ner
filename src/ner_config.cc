@@ -76,7 +76,11 @@ void NerConfig::load()
     _sortMode = NOTMUCH_SORT_NEWEST_FIRST;
     _refreshView = true;
     _addSigDashes = true;
-    _commands.clear();
+    _commands = {
+        { "send",   "/usr/sbin/sendmail -t" },
+        { "edit",   "vim +" },
+        { "html",   "elinks -dump" }
+    };
 
     std::map<ColorID, Color> colorMap = defaultColorMap;
 
@@ -211,22 +215,9 @@ void NerConfig::load()
         init_pair(color->first, color->second.foreground, color->second.background);
 }
 
-std::string NerConfig::command(const std::string & name)
+const std::map<std::string, std::string> & NerConfig::commands() const
 {
-    auto command = _commands.find(name);
-
-    if (command == _commands.end())
-    {
-        /* Use a default */
-        if (name == "send")
-            return "/usr/sbin/sendmail -t";
-        else if (name == "edit")
-            return "vim +";
-    }
-    else
-    {
-        return command->second;
-    }
+    return _commands;
 }
 
 const std::vector<Search> & NerConfig::searches() const

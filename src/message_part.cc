@@ -74,7 +74,7 @@ TextPart::TextPart(GMimePart * part)
             dup2(readPipes[1], 1);
             dup2(writePipes[0], 0);
 
-            execlp("sh", "sh", "-c", NerConfig::instance().command("html").c_str(), NULL);
+            execlp("sh", "sh", "-c", NerConfig::instance().commands().at("html").c_str(), NULL);
             exit(0);
         }
     }

@@ -60,7 +60,7 @@ void EmailEditView::edit()
 {
     endwin();
 
-    std::string command(NerConfig::instance().command("edit"));
+    std::string command(NerConfig::instance().commands().at("edit"));
     command.push_back(' ');
     command.append(_messageFile);
     std::system(command.c_str());
@@ -145,7 +145,7 @@ void EmailEditView::send()
 
     /* Send the message */
     std::string sendCommand = _identity->sendCommand.empty() ?
-        NerConfig::instance().command("send") : _identity->sendCommand;
+        NerConfig::instance().commands().at("send") : _identity->sendCommand;
     FILE * sendMailPipe = popen(sendCommand.c_str(), "w");
     GMimeStream * sendMailStream = g_mime_stream_file_new(sendMailPipe);
     g_mime_stream_file_set_owner(GMIME_STREAM_FILE(sendMailStream), false);

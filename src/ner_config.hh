@@ -33,7 +33,7 @@ class NerConfig
 
         void load();
 
-        std::string command(const std::string & name);
+        const std::map<std::string, std::string> & commands() const;
 
         const std::vector<Search> & searches() const;
 
