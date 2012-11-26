@@ -82,7 +82,8 @@ struct ColorPair
     int background;
 };
 
-extern std::map<Color, ColorPair> defaultColorMap;
+typedef std::map<Color, ColorPair> ColorMap;
+extern ColorMap defaultColorMap;
 
 #endif
 

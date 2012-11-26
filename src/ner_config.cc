@@ -82,7 +82,7 @@ void NerConfig::load()
         { "html",   "elinks -dump" }
     };
 
-    std::map<Color, ColorPair> colorMap = defaultColorMap;
+    ColorMap colorMap = defaultColorMap;
 
     std::string configPath(std::string(getenv("HOME")) + "/" + nerConfigFile);
     std::ifstream configFile(configPath.c_str());
