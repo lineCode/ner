@@ -19,113 +19,114 @@
 
 #include "ncurses.hh"
 
-using namespace NCurses;
-
-CutOffException::~CutOffException() throw ()
+namespace NCurses
 {
-}
-
-const char * CutOffException::what() throw ()
-{
-    return "Line cut off past screen";
-}
-
-void NCurses::checkMove(WINDOW * window, int x)
-{
-    if (wmove(window, getcury(window), x) == ERR)
-        throw NCurses::CutOffException();
-}
-
-void NCurses::addCutOffIndicator(WINDOW * window, attr_t attributes)
-{
-    wmove(window, getcury(window), getmaxx(window) - 1);
-    waddch(window, '$' | attributes | COLOR_PAIR(Color::CutOffIndicator));
-}
-
-int NCurses::addPlainString(WINDOW * window, const std::string & string,
-    attr_t attributes, Color color, int maxLength)
-{
-    return addPlainString(window, string.begin(), string.end(), attributes, color, maxLength);
-}
-
-int NCurses::addPlainString(WINDOW * window, const char * string,
-    attr_t attributes, Color color, int maxLength)
-{
-    return addPlainString(window, string, string + std::strlen(string), attributes, color, maxLength);
-}
-
-int NCurses::addUtf8String(WINDOW * window, const char * string,
-    attr_t attributes, Color color, int maxLength)
-{
-    mbstate_t state = { 0 };
-
-    int length = strlen(string);
-
-    cchar_t displayCharacters[length + 1];
-    int displayIndex = 0;
-    int displayLength = 0;
-
-    wchar_t wideCharacters[CCHARW_MAX + 1];
-    wchar_t wideCharacter;
-    int wideIndex = 0;
-
-    for (int position = 0; position < length;)
+    CutOffException::~CutOffException() throw ()
     {
-        int bytesRead = std::mbrtowc(&wideCharacter,
-            string + position, length - position, &state);
+    }
 
-        position += bytesRead;
+    const char * CutOffException::what() throw ()
+    {
+        return "Line cut off past screen";
+    }
 
-        if (bytesRead < 0)
-            break;
+    void checkMove(WINDOW * window, int x)
+    {
+        if (wmove(window, getcury(window), x) == ERR)
+            throw CutOffException();
+    }
 
-        int width = wcwidth(wideCharacter);
+    void addCutOffIndicator(WINDOW * window, attr_t attributes)
+    {
+        wmove(window, getcury(window), getmaxx(window) - 1);
+        waddch(window, '$' | attributes | COLOR_PAIR(Color::CutOffIndicator));
+    }
 
-        if (width > 0)
-            displayLength += width;
+    int addPlainString(WINDOW * window, const std::string & string,
+        attr_t attributes, Color color, int maxLength)
+    {
+        return addPlainString(window, string.begin(), string.end(), attributes, color, maxLength);
+    }
 
-        if (displayLength > maxLength)
-            break;
+    int addPlainString(WINDOW * window, const char * string,
+        attr_t attributes, Color color, int maxLength)
+    {
+        return addPlainString(window, string, string + std::strlen(string), attributes, color, maxLength);
+    }
 
-        /* We found a new spacing character, set the next cchar_t */
-        if ((width > 0 && wideIndex > 0) || wideIndex == CCHARW_MAX)
+    int addUtf8String(WINDOW * window, const char * string,
+        attr_t attributes, Color color, int maxLength)
+    {
+        mbstate_t state = { 0 };
+
+        int length = strlen(string);
+
+        cchar_t displayCharacters[length + 1];
+        int displayIndex = 0;
+        int displayLength = 0;
+
+        wchar_t wideCharacters[CCHARW_MAX + 1];
+        wchar_t wideCharacter;
+        int wideIndex = 0;
+
+        for (int position = 0; position < length;)
+        {
+            int bytesRead = std::mbrtowc(&wideCharacter,
+                string + position, length - position, &state);
+
+            position += bytesRead;
+
+            if (bytesRead < 0)
+                break;
+
+            int width = wcwidth(wideCharacter);
+
+            if (width > 0)
+                displayLength += width;
+
+            if (displayLength > maxLength)
+                break;
+
+            /* We found a new spacing character, set the next cchar_t */
+            if ((width > 0 && wideIndex > 0) || wideIndex == CCHARW_MAX)
+            {
+                wideCharacters[wideIndex] = L'\0';
+                setcchar(&displayCharacters[displayIndex++], wideCharacters,
+                    attributes, color, NULL);
+
+                /* Start the next display character */
+                wideIndex = 0;
+            }
+            else if (width == 0 && wideIndex == 0)
+                wideCharacters[wideIndex++] = L' ';
+            else if (width < 0)
+                break;
+
+            wideCharacters[wideIndex++] = wideCharacter;
+        }
+
+        if (wideIndex > 0)
         {
             wideCharacters[wideIndex] = L'\0';
             setcchar(&displayCharacters[displayIndex++], wideCharacters,
                 attributes, color, NULL);
-
-            /* Start the next display character */
-            wideIndex = 0;
         }
-        else if (width == 0 && wideIndex == 0)
-            wideCharacters[wideIndex++] = L' ';
-        else if (width < 0)
-            break;
 
-        wideCharacters[wideIndex++] = wideCharacter;
+        /* Set the NULL cchar_t */
+        wideCharacters[0] = L'\0';
+        setcchar(&displayCharacters[displayIndex], wideCharacters, 0, 0, NULL);
+
+        wadd_wchnstr(window, displayCharacters, displayIndex);
+
+        return displayLength;
     }
 
-    if (wideIndex > 0)
+    int addChar(WINDOW * window, chtype character, int attributes, Color color)
     {
-        wideCharacters[wideIndex] = L'\0';
-        setcchar(&displayCharacters[displayIndex++], wideCharacters,
-            attributes, color, NULL);
+        character |= attributes | COLOR_PAIR(color);
+        waddchnstr(window, &character, 1);
+        return 1;
     }
-
-    /* Set the NULL cchar_t */
-    wideCharacters[0] = L'\0';
-    setcchar(&displayCharacters[displayIndex], wideCharacters, 0, 0, NULL);
-
-    wadd_wchnstr(window, displayCharacters, displayIndex);
-
-    return displayLength;
-}
-
-int NCurses::addChar(WINDOW * window, chtype character, int attributes, Color color)
-{
-    character |= attributes | COLOR_PAIR(color);
-    waddchnstr(window, &character, 1);
-    return 1;
 }
 
 // vim: fdm=syntax fo=croql et sw=4 sts=4 ts=8
