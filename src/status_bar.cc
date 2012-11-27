@@ -63,8 +63,7 @@ void StatusBar::update()
         A_BOLD, Color::StatusBarStatus);
 
     /* Status */
-    std::vector<std::string> status(view.status());
-    for (auto statusItem = status.begin(), e = status.end(); statusItem != e; ++statusItem)
+    for (auto & status : view.status())
     {
         try
         {
@@ -75,7 +74,7 @@ void StatusBar::update()
 
             NCurses::checkMove(_statusWindow, ++x);
 
-            x += NCurses::addPlainString(_statusWindow, *statusItem, 0, Color::StatusBarStatus);
+            x += NCurses::addPlainString(_statusWindow, status, 0, Color::StatusBarStatus);
         }
         catch (const NCurses::CutOffException & e)
         {

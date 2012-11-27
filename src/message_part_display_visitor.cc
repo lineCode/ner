@@ -65,14 +65,14 @@ void MessagePartDisplayVisitor::visit(const TextPart & part)
     if (part.folded)
         return;
 
-    for (auto line = part.lines.begin(), e = part.lines.end(); line != e; ++line)
+    for (auto & line : part.lines)
     {
         unsigned citationLevel = 0;
-        for (auto character = line->begin(); character != line->end(); ++character)
+        for (auto c : line)
         {
-            if (*character == '>')
+            if (c == '>')
                 ++citationLevel;
-            else if (*character != ' ')
+            else if (c != ' ')
                 break;
         }
 
@@ -88,7 +88,7 @@ void MessagePartDisplayVisitor::visit(const TextPart & part)
             }
         }
 
-        for (auto lineWrapper = LineWrapper(*line, _area.width-1); !lineWrapper.done(); ++_messageRow)
+        for (auto lineWrapper = LineWrapper(line, _area.width-1); !lineWrapper.done(); ++_messageRow)
         {
             bool selected = _messageRow == _selection;
             bool wrapped = lineWrapper.wrapped();
