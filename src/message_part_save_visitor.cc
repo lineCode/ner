@@ -34,28 +34,23 @@ void MessagePartSaveVisitor::visit(const TextPart & part)
 
 void MessagePartSaveVisitor::visit(const Attachment & part)
 {
-    try
+    std::string filename;
+    if (StatusBar::instance().prompt(filename, "Save attachement to file: ",
+        "save-attachment", part.filename) && !filename.empty())
     {
-        std::string filename = StatusBar::instance().prompt("Save attachement to file: ", std::string(), part.filename);
-
         struct stat dummy;
         if (stat(filename.c_str(), &dummy) == 0)
         {
-            while (true)
+            std::string answer;
+
+            if (StatusBar::instance().prompt(answer, "File exists, overwrite? [y,N]: ")
+                && (answer == "y" || answer == "Y"))
             {
-                std::string answer = StatusBar::instance().prompt("File exists, overwrite ? [y,n]: ");
-                if (answer == "n")
-                    return;
-                if (answer == "y")
-                    break;
+                FILE * file = fopen(filename.c_str(), "w");
+                GMimeStream * stream = g_mime_stream_file_new(file);
+                g_mime_data_wrapper_write_to_stream(part.data, stream);
+                g_object_unref(stream);
             }
         }
-
-        FILE * file = fopen(filename.c_str(), "w");
-        GMimeStream * stream = g_mime_stream_file_new(file);
-        g_mime_data_wrapper_write_to_stream(part.data, stream);
-        g_object_unref(stream);
     }
-    catch (AbortInputException&)
-    { }
 }

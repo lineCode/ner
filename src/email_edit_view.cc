@@ -173,7 +173,13 @@ void EmailEditView::send()
 
 void EmailEditView::attach()
 {
-    std::string filename = StatusBar::instance().prompt("Filename: ", "attachments");
+    std::string filename;
+
+    if (!StatusBar::instance().prompt(filename, "Filename: ", "attachment-file")
+        || filename.empty())
+    {
+        return;
+    }
 
     GError* error = NULL;
     auto file = autoUnref(g_file_new_for_path(filename.c_str()));

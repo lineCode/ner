@@ -22,18 +22,21 @@
 
 #include "email_edit_view.hh"
 
+struct ComposeFields
+{
+    std::string to, cc, bcc, subject, identity;
+
+    static bool prompt(ComposeFields & fields);
+};
+
 class ComposeView : public EmailEditView
 {
     public:
-        ComposeView(const View::Geometry & geometry = View::Geometry());
+        ComposeView(const ComposeFields & fields, const View::Geometry & geometry
+            = View::Geometry());
         virtual ~ComposeView();
 
         virtual std::string name() const { return "compose-view"; }
-
-    protected:
-        std::string _to;
-        std::string _cc;
-        std::string _subject;
 };
 
 #endif

@@ -44,8 +44,9 @@ class StatusBar
         void resize();
 
         void displayMessage(const std::string & message);
-        std::string prompt(const std::string & message, const std::string & field = std::string(),
-                           const std::string & initialValue = std::string());
+        bool prompt(std::string & result, const std::string & message,
+            const std::string & field = std::string(),
+            const std::string & initialValue = std::string());
 
     private:
         static StatusBar * _instance;

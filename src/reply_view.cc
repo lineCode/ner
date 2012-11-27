@@ -132,7 +132,8 @@ ReplyView::ReplyView(const std::string & messageId, const View::Geometry & geome
         _identity = userIdentity;
     else
     {
-        std::string identityName = StatusBar::instance().prompt("Identity: ", "identity");
+        std::string identityName;
+        StatusBar::instance().prompt(identityName, "Identity: ", "identity");
 
         if (!identityName.empty())
             setIdentity(identityName);

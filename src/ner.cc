@@ -109,32 +109,27 @@ void Ner::quit()
 
 void Ner::search()
 {
-    try
-    {
-        std::string searchTerms = StatusBar::instance().prompt("Search: ", "search");
+    std::string terms;
 
-        if (!searchTerms.empty())
-            _viewManager.addView(std::make_shared<SearchView>(searchTerms));
-    }
-    catch (const AbortInputException&)
-    { }
+    if (StatusBar::instance().prompt(terms, "Search: ", "search")
+        && !terms.empty())
+        _viewManager.addView(std::make_shared<SearchView>(terms));
 }
 
 void Ner::compose()
 {
-    try
-    {
-        _viewManager.addView(std::make_shared<ComposeView>());
-    }
-    catch (const AbortInputException&)
-    { }
+    ComposeFields fields;
+
+    if (ComposeFields::prompt(fields))
+        _viewManager.addView(std::make_shared<ComposeView>(fields));
 }
 
 void Ner::openMessage()
 {
-    std::string messageId = StatusBar::instance().prompt("Message ID: ", "message-id");
+    std::string messageId;
 
-    if (!messageId.empty())
+    if (StatusBar::instance().prompt(messageId, "Message ID: ", "message-id")
+        && !messageId.empty())
     {
         if (messageId.size() > 3 && std::equal(messageId.begin(), messageId.begin() + 3, "id:"))
             messageId.erase(0, 3);
@@ -154,9 +149,10 @@ void Ner::openMessage()
 
 void Ner::openThread()
 {
-    std::string threadId = StatusBar::instance().prompt("Thread ID: ", "thread-id");
+    std::string threadId;
 
-    if (!threadId.empty())
+    if (StatusBar::instance().prompt(threadId, "Thread ID: ", "thread-id")
+        && !threadId.empty())
     {
         try
         {

@@ -25,17 +25,13 @@
 
 #include "ncurses.hh"
 
-class AbortInputException : public std::exception
-{
-};
-
 class LineEditor
 {
     public:
         LineEditor(WINDOW * window, int x, int y);
 
-        std::string line(const std::string & field = std::string(),
-                         const std::string & initialValue = std::string()) const;
+        bool line(std::string & result, const std::string & field = std::string(),
+            const std::string & initialValue = std::string()) const;
 
     private:
         WINDOW * _window;

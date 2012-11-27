@@ -26,27 +26,31 @@
 #include "notmuch.hh"
 #include "ner_config.hh"
 
-ComposeView::ComposeView(const View::Geometry & geometry)
+bool ComposeFields::prompt(ComposeFields & fields)
+{
+    StatusBar & s = StatusBar::instance();
+    return s.prompt(fields.to, "To: ", "compose-to")
+        && s.prompt(fields.cc, "Cc: ", "compose-cc")
+        && s.prompt(fields.bcc, "Bcc: ", "compose-bcc")
+        && s.prompt(fields.subject, "Subject: ", "compose-subject")
+        && s.prompt(fields.identity, "Identity: ", "compose-identity");
+}
+
+ComposeView::ComposeView(const ComposeFields & fields, const View::Geometry & geometry)
     : EmailEditView(geometry)
 {
     GMimeMessage * message = g_mime_message_new(true);
 
-    std::string to = StatusBar::instance().prompt("To: ", "compose-to");
-    std::string cc = StatusBar::instance().prompt("Cc: ", "compose-cc");
-    std::string bcc = StatusBar::instance().prompt("Bcc: ", "compose-bcc");
-    std::string subject = StatusBar::instance().prompt("Subject: ", "compose-subject");
-    std::string identityName = StatusBar::instance().prompt("Identity: ", "identity");
-
-    if (!identityName.empty())
-        setIdentity(identityName);
+    if (!fields.identity.empty())
+        setIdentity(fields.identity);
 
     InternetAddress * from = internet_address_mailbox_new(_identity->name.c_str(),
         _identity->email.c_str());
     g_mime_message_set_sender(message, internet_address_to_string(from, true));
-    g_mime_object_set_header(GMIME_OBJECT(message), "To", to.c_str());
-    g_mime_object_set_header(GMIME_OBJECT(message), "Cc", cc.c_str());
-    g_mime_object_set_header(GMIME_OBJECT(message), "Bcc", bcc.c_str());
-    g_mime_message_set_subject(message, subject.c_str());
+    g_mime_object_set_header(GMIME_OBJECT(message), "To", fields.to.c_str());
+    g_mime_object_set_header(GMIME_OBJECT(message), "Cc", fields.cc.c_str());
+    g_mime_object_set_header(GMIME_OBJECT(message), "Bcc", fields.bcc.c_str());
+    g_mime_message_set_subject(message, fields.subject.c_str());
 
     std::ostringstream messageContentStream;
 

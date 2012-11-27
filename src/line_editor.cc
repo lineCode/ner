@@ -31,12 +31,10 @@ LineEditor::LineEditor(WINDOW * window, int x, int y)
 {
 }
 
-std::string LineEditor::line(const std::string & field, const std::string & initialValue) const
+bool LineEditor::line(std::string & result, const std::string & field,
+    const std::string & initialValue) const
 {
-    std::vector<std::string> history;
-
-    if (!field.empty())
-        history = _history[field];
+    std::vector<std::string> & history(_history[field]);
 
     history.push_back(std::string());
 
@@ -133,9 +131,10 @@ std::string LineEditor::line(const std::string & field, const std::string & init
                     std::string::reverse_iterator(position), response->rend(), notSpace),
                     response->rend(), ' ').base(), position);
                 break;
-            case 3:
-                throw AbortInputException();
-                break;
+            case 'c' - 96:
+                history.pop_back();
+                result = std::string();
+                return false;
             default:
                 position = response->insert(position, c) + 1;
         }
@@ -147,10 +146,13 @@ std::string LineEditor::line(const std::string & field, const std::string & init
         wrefresh(_window);
     }
 
-    if (!field.empty() && !response->empty())
-        _history[field].push_back(*response);
+    result = *response;
 
-    return *response;
+    /* Don't keep history for empty fields. */
+    if (field.empty())
+        _history.at(field).clear();
+
+    return true;
 }
 
 // vim: fdm=syntax fo=croql et sw=4 sts=4 ts=8
