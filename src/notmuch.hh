@@ -49,11 +49,6 @@ namespace Notmuch
 
             operator notmuch_database_t *() const;
 
-            /**
-             * Reopen all databases, updating to the latest version.
-             */
-            static void reopen();
-
         private:
             bool _owner;
             notmuch_database_t * _database;
