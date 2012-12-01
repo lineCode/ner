@@ -18,40 +18,22 @@
  */
 
 #include <cstring>
-#include <cassert>
 
 #include "notmuch_iterator.hh"
 
 namespace Notmuch
 {
-    #define DEFINE_ITERATOR(iterator, name)                                 \
-        template <>                                                         \
-        iterator::value_type iterator::operator*() const                    \
-        {                                                                   \
-            assert(notmuch_ ## name ## _valid(_collection));                \
-            return notmuch_ ## name ## _get(_collection);                   \
-        }                                                                   \
-                                                                            \
-        template <>                                                         \
-        const iterator & iterator::operator++() const                       \
-        {                                                                   \
-            notmuch_ ## name ## _move_to_next(_collection);                 \
-                                                                            \
-            return *this;                                                   \
-        }                                                                   \
-                                                                            \
-        template <>                                                         \
-        bool iterator::at_end() const                                       \
-        {                                                                   \
-            return _collection == NULL                                      \
-                || !notmuch_ ## name ## _valid(_collection);                \
-        }
+    #define DEFINE_ITERATOR_FUNCTIONS(iterator, name)                       \
+        template <> iterator::GetFunction                                   \
+        iterator::get = &notmuch_ ## name ## _get;                          \
+        template <> iterator::ValidFunction                                 \
+        iterator::valid = &notmuch_ ## name ## _valid;                      \
+        template <> iterator::MoveToNextFunction                            \
+        iterator::move_to_next = &notmuch_ ## name ## _move_to_next;
 
-    DEFINE_ITERATOR(MessageIterator, messages)
-    DEFINE_ITERATOR(ThreadIterator, threads)
-    DEFINE_ITERATOR(TagIterator, tags)
-
-    #undef DEFINE_ITERATOR
+    DEFINE_ITERATOR_FUNCTIONS(MessageIterator, messages);
+    DEFINE_ITERATOR_FUNCTIONS(ThreadIterator, threads);
+    DEFINE_ITERATOR_FUNCTIONS(TagIterator, tags);
 
     MessageTreeIterator::MessageTreeIterator()
     {
@@ -88,23 +70,6 @@ namespace Notmuch
     }
 
 }
-
-#define DEFINE_BEGIN_END(iterator, name)                                    \
-    Notmuch::iterator begin(notmuch_ ## name ## _t * collection)            \
-    {                                                                       \
-        return Notmuch::iterator(collection);                               \
-    }                                                                       \
-                                                                            \
-    Notmuch::iterator end(notmuch_ ## name ## _t * collection)              \
-    {                                                                       \
-        return Notmuch::iterator();                                         \
-    }
-
-DEFINE_BEGIN_END(MessageIterator, messages)
-DEFINE_BEGIN_END(ThreadIterator, threads)
-DEFINE_BEGIN_END(TagIterator, tags)
-
-#undef DEFINE_BEGIN_END
 
 Notmuch::MessageTreeIterator begin(notmuch_thread_t * thread)
 {

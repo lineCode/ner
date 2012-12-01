@@ -23,10 +23,32 @@
 #include <iterator>
 #include <list>
 #include <notmuch.h>
+#include <cassert>
 
 namespace Notmuch
 {
-    template <typename C, typename T>
+    template <typename C>
+    struct CollectionTraits;
+
+    template<>
+    struct CollectionTraits<notmuch_messages_t>
+    {
+        typedef notmuch_message_t * Value;
+    };
+
+    template<>
+    struct CollectionTraits<notmuch_threads_t>
+    {
+        typedef notmuch_thread_t * Value;
+    };
+
+    template<>
+    struct CollectionTraits<notmuch_tags_t>
+    {
+        typedef const char * Value;
+    };
+
+    template <typename C, typename T = typename CollectionTraits<C>::Value>
     class Iterator : public std::iterator<std::input_iterator_tag, T>
     {
         public:
@@ -40,12 +62,22 @@ namespace Notmuch
             {
             }
 
-            T operator*() const;
-            const Iterator & operator++() const;
+            T operator*() const
+            {
+                assert(valid(_collection));
+                return get(_collection);
+            }
+
+            const Iterator & operator++() const
+            {
+                move_to_next(_collection);
+                return *this;
+            }
 
             bool operator==(const Iterator & other) const
             {
-                return at_end() == other.at_end();
+                return (_collection == nullptr || !valid(_collection))
+                    && (other._collection == nullptr || !valid(other._collection));
             }
 
             bool operator!=(const Iterator & other) const
@@ -56,13 +88,20 @@ namespace Notmuch
             bool at_end() const;
 
         private:
+            typedef T (* GetFunction)(C *);
+            typedef notmuch_bool_t (* ValidFunction)(C *);
+            typedef void (* MoveToNextFunction)(C *);
+
+            static GetFunction get;
+            static ValidFunction valid;
+            static MoveToNextFunction move_to_next;
 
             C * _collection;
     };
 
-    typedef Iterator<notmuch_messages_t, notmuch_message_t *> MessageIterator;
-    typedef Iterator<notmuch_threads_t, notmuch_thread_t *> ThreadIterator;
-    typedef Iterator<notmuch_tags_t, const char *> TagIterator;
+    typedef Iterator<notmuch_messages_t> MessageIterator;
+    typedef Iterator<notmuch_threads_t> ThreadIterator;
+    typedef Iterator<notmuch_tags_t> TagIterator;
 
     class MessageTreeIterator : public std::iterator<std::input_iterator_tag, notmuch_message_t *>
     {
@@ -91,14 +130,17 @@ namespace Notmuch
     };
 }
 
-Notmuch::MessageIterator begin(notmuch_messages_t * messages);
-Notmuch::MessageIterator end(notmuch_messages_t * messages);
+template <typename C>
+Notmuch::Iterator<C> begin(C * collection)
+{
+    return Notmuch::Iterator<C>(collection);
+}
 
-Notmuch::ThreadIterator begin(notmuch_threads_t * threads);
-Notmuch::ThreadIterator end(notmuch_threads_t * threads);
-
-Notmuch::TagIterator begin(notmuch_tags_t * tags);
-Notmuch::TagIterator end(notmuch_tags_t * tags);
+template <typename C>
+Notmuch::Iterator<C> end(C * collection)
+{
+    return Notmuch::Iterator<C>();
+}
 
 Notmuch::MessageTreeIterator begin(notmuch_thread_t * thread);
 Notmuch::MessageTreeIterator end(notmuch_thread_t * thread);
