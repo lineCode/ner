@@ -69,7 +69,7 @@ namespace Notmuch
 
         std::list<notmuch_message_t *> replies_list;
         notmuch_messages_t * replies = notmuch_message_get_replies(message);
-        std::copy(std::begin(replies), std::end(replies), std::back_inserter(replies_list));
+        std::copy(begin(replies), end(replies), std::back_inserter(replies_list));
         messages.splice(messages.begin(), replies_list);
 
         return *this;
@@ -89,35 +89,32 @@ namespace Notmuch
 
 }
 
-namespace std
-{
-    #define DEFINE_BEGIN_END(iterator, name)                                \
-        Notmuch::iterator begin(notmuch_ ## name ## _t * collection)        \
-        {                                                                   \
-            return Notmuch::iterator(collection);                           \
-        }                                                                   \
+#define DEFINE_BEGIN_END(iterator, name)                                    \
+    Notmuch::iterator begin(notmuch_ ## name ## _t * collection)            \
+    {                                                                       \
+        return Notmuch::iterator(collection);                               \
+    }                                                                       \
                                                                             \
-        Notmuch::iterator end(notmuch_ ## name ## _t * collection)          \
-        {                                                                   \
-            return Notmuch::iterator();                                     \
-        }
-
-    DEFINE_BEGIN_END(MessageIterator, messages)
-    DEFINE_BEGIN_END(ThreadIterator, threads)
-    DEFINE_BEGIN_END(TagIterator, tags)
-
-    #undef DEFINE_BEGIN_END
-
-    Notmuch::MessageTreeIterator begin(notmuch_thread_t * thread)
-    {
-        notmuch_messages_t * messages = notmuch_thread_get_toplevel_messages(thread);
-        return Notmuch::MessageTreeIterator(std::begin(messages), std::end(messages));
+    Notmuch::iterator end(notmuch_ ## name ## _t * collection)              \
+    {                                                                       \
+        return Notmuch::iterator();                                         \
     }
 
-    Notmuch::MessageTreeIterator end(notmuch_thread_t * thread)
-    {
-        return Notmuch::MessageTreeIterator();
-    }
+DEFINE_BEGIN_END(MessageIterator, messages)
+DEFINE_BEGIN_END(ThreadIterator, threads)
+DEFINE_BEGIN_END(TagIterator, tags)
+
+#undef DEFINE_BEGIN_END
+
+Notmuch::MessageTreeIterator begin(notmuch_thread_t * thread)
+{
+    notmuch_messages_t * messages = notmuch_thread_get_toplevel_messages(thread);
+    return Notmuch::MessageTreeIterator(begin(messages), end(messages));
+}
+
+Notmuch::MessageTreeIterator end(notmuch_thread_t * thread)
+{
+    return Notmuch::MessageTreeIterator();
 }
 
 // vim: fdm=syntax fo=croql et sw=4 sts=4 ts=8

@@ -91,20 +91,17 @@ namespace Notmuch
     };
 }
 
-namespace std
-{
-    Notmuch::MessageIterator begin(notmuch_messages_t * messages);
-    Notmuch::MessageIterator end(notmuch_messages_t * messages);
+Notmuch::MessageIterator begin(notmuch_messages_t * messages);
+Notmuch::MessageIterator end(notmuch_messages_t * messages);
 
-    Notmuch::ThreadIterator begin(notmuch_threads_t * threads);
-    Notmuch::ThreadIterator end(notmuch_threads_t * threads);
+Notmuch::ThreadIterator begin(notmuch_threads_t * threads);
+Notmuch::ThreadIterator end(notmuch_threads_t * threads);
 
-    Notmuch::TagIterator begin(notmuch_tags_t * tags);
-    Notmuch::TagIterator end(notmuch_tags_t * tags);
+Notmuch::TagIterator begin(notmuch_tags_t * tags);
+Notmuch::TagIterator end(notmuch_tags_t * tags);
 
-    Notmuch::MessageTreeIterator begin(notmuch_thread_t * thread);
-    Notmuch::MessageTreeIterator end(notmuch_thread_t * thread);
-}
+Notmuch::MessageTreeIterator begin(notmuch_thread_t * thread);
+Notmuch::MessageTreeIterator end(notmuch_thread_t * thread);
 
 #endif
 
