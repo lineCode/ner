@@ -29,39 +29,34 @@ const int wrapWidth(80);
 
 MessagePartDisplayVisitor::MessagePartDisplayVisitor(WINDOW * window,
     const View::Geometry & area, int offset, int selection)
-    : _window(window), _area(area), _offset(offset), _row(area.y), _messageRow(0),
+    : _renderer(window, false), _area(area), _offset(offset), _messageRow(0),
         _selection(selection)
 {
+    _renderer.move(area.y, 0);
 }
 
 void MessagePartDisplayVisitor::visit(const TextPart & part)
 {
-    if (_messageRow >= _offset && _row < _area.y + _area.height)
+    using namespace NCurses;
+
+    Renderer & r = _renderer;
+
+    if (_messageRow >= _offset && r.row() < _area.y + _area.height)
     {
         bool selected = _messageRow == _selection;
 
-        int x = _area.x;
-        wmove(_window, _row++, _area.x);
+        r << styled(part.folded ? '+' : '-', Color::AttachmentFilename, A_BOLD);
+        r.skip(1);
 
-        attr_t attributes = 0;
-        x += NCurses::addChar(_window, part.folded ? '+' : '-',
-                              A_BOLD | attributes, Color::AttachmentFilename);
-        NCurses::checkMove(_window, ++x);
+        r.set_line_attributes(selected ? A_REVERSE : 0);
+        r << "Text Part: " << styled(part.contentType, Color::AttachmentMimeType)
+            << clear_attr;
 
-        if (selected)
-        {
-            attributes |= A_REVERSE;
-            wchgat(_window, -1, A_REVERSE, 0, NULL);
-        }
-
-        x += NCurses::addPlainString(_window, "Text Part: ", attributes);
-        NCurses::checkMove(_window, x);
-
-        x += NCurses::addPlainString(_window, part.contentType, attributes,
-                                     Color::AttachmentMimeType);
-        NCurses::checkMove(_window, x - 1);
-        ++_messageRow;
+        r.next_line();
     }
+
+    ++_messageRow;
+
     if (part.folded)
         return;
 
@@ -95,84 +90,54 @@ void MessagePartDisplayVisitor::visit(const TextPart & part)
 
             std::string wrappedLine(lineWrapper.next());
 
-            if (_messageRow < _offset || _row >= _area.y + _area.height)
+            if (_messageRow < _offset || r.row() >= _area.y + _area.height)
                 continue;
 
             if (wrapped)
-                mvwaddch(_window, _row, _area.x, ACS_CKBOARD | COLOR_PAIR(Color::LineWrapIndicator));
+                r << styled(ch(ACS_CKBOARD), Color::LineWrapIndicator);
 
-            wmove(_window, _row, _area.x + 2);
+            r.advance(2);
 
-            attr_t attributes = 0;
+            r.set_line_attributes(selected ? A_REVERSE : 0);
 
-            if (selected)
-            {
-                attributes |= A_REVERSE;
-                wchgat(_window, _area.width - 2, A_REVERSE, 0, NULL);
-            }
-
-            if (NCurses::addUtf8String(_window, wrappedLine.c_str(), attributes, color) >
-                _area.width - _area.y - 2)
-            {
-                NCurses::addCutOffIndicator(_window, attributes);
-            }
-
-            ++_row;
+            r << styled(wrappedLine, color) << clear_attr;
+            r.add_cut_off_indicator();
+            r.next_line();
         }
     }
 }
 
 void MessagePartDisplayVisitor::visit(const Attachment & part)
 {
-    if (_messageRow >= _offset && _row < _area.y + _area.height)
+    using namespace NCurses;
+
+    Renderer & r = _renderer;
+
+    if (_messageRow >= _offset && r.row() < _area.y + _area.height)
     {
-        try
-        {
-            bool selected = _messageRow == _selection;
+        bool selected = _messageRow == _selection;
 
-            int x = _area.x;
+        r << styled('*', Color::AttachmentFilename, A_BOLD);
+        r.skip(1);
 
-            wmove(_window, _row++, _area.x);
+        if (selected)
+            r.set_line_attributes(A_REVERSE);
 
-            attr_t attributes = 0;
+        r << "Attachment: " << set_color(Color::AttachmentFilename) << part.filename;
+        r.skip(1);
+        r << set_color(Color::AttachmentMimeType) << part.contentType;
+        r.skip(1);
+        r << set_color(Color::AttachmentFilesize) << part.filesize;
 
-            x += NCurses::addChar(_window, '*', A_BOLD | attributes, Color::AttachmentFilename);
-            NCurses::checkMove(_window, ++x);
-
-            if (selected)
-            {
-                attributes |= A_REVERSE;
-                wchgat(_window, -1, A_REVERSE, 0, NULL);
-            }
-
-            x += NCurses::addPlainString(_window, "Attachment: ", attributes);
-            NCurses::checkMove(_window, x);
-
-            x += NCurses::addUtf8String(_window, part.filename.c_str(), attributes,
-                Color::AttachmentFilename);
-            NCurses::checkMove(_window, ++x);
-
-            x += NCurses::addPlainString(_window, part.contentType, attributes,
-                Color::AttachmentMimeType);
-            NCurses::checkMove(_window, ++x);
-
-            x += NCurses::addPlainString(_window, formatByteSize(part.filesize), attributes,
-                Color::AttachmentFilesize);
-
-            NCurses::checkMove(_window, x - 1);
-        }
-        catch (const NCurses::CutOffException & e)
-        {
-            NCurses::addCutOffIndicator(_window);
-        }
+        r.add_cut_off_indicator();
+        r.next_line();
+        ++_messageRow;
     }
-
-    ++_messageRow;
 }
 
 int MessagePartDisplayVisitor::row() const
 {
-    return _row;
+    return _renderer.row();
 }
 
 int MessagePartDisplayVisitor::lines() const

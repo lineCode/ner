@@ -23,6 +23,7 @@
 
 #include <sstream>
 #include <iterator>
+#include <iomanip>
 
 const int nameWidth = 25;
 
@@ -40,53 +41,40 @@ ViewView::~ViewView()
 
 void ViewView::update()
 {
-    werase(_window);
+    using namespace NCurses;
+
+    Renderer r(_window);
 
     if (_offset > lineCount())
         return;
 
-    int row = 0;
-
     for (auto view = ViewManager::instance()._views.begin() + _offset,
         e = ViewManager::instance()._views.end();
-        view != e && row < getmaxy(_window); ++view, ++row)
+        view != e && !r.off_screen(); ++view, r.next_line())
     {
         /* Don't list the ViewView */
         if (view->get() == this)
             continue;
 
-        bool selected = row + _offset == _selectedIndex;
+        bool selected = r.row() + _offset == _selectedIndex;
 
-        int x = 0;
-
-        wmove(_window, row, x);
-
-        attr_t attributes = 0;
-
-        if (selected)
-        {
-            attributes |= A_REVERSE;
-            wchgat(_window, -1, A_REVERSE, 0, NULL);
-        }
+        r.set_line_attributes(selected ? A_REVERSE : 0);
 
         /* Number */
-        std::ostringstream numberStream;
-        numberStream << row + _offset << ".";
-        x += NCurses::addPlainString(_window, numberStream.str(),
-            attributes, Color::ViewViewNumber);
-
-        NCurses::checkMove(_window, ++x);
+        r << set_color(Color::ViewViewNumber) << std::setw(2) << r.row() + _offset << '.';
 
         /* Name */
-        NCurses::addPlainString(_window, (*view)->name(),
-            attributes, Color::ViewViewName, nameWidth - 1);
-
-        NCurses::checkMove(_window, x = nameWidth);
+        r.skip(1);
+        r.set_max_width(nameWidth - 1);
+        r << set_color(Color::ViewViewName) << (*view)->name();
+        r.advance(nameWidth);
 
         /* Status */
+        r.set_color(Color::ViewViewStatus);
+        r.set_max_width();
         std::vector<std::string> status((*view)->status());
         if (status.size() > 0)
-            NCurses::addPlainString(_window, status.at(0), attributes, Color::ViewViewStatus);
+            r << status.at(0);
     }
 }
 

@@ -89,7 +89,7 @@ ThreadView::~ThreadView()
 
 void ThreadView::update()
 {
-    std::vector<chtype> leading;
+    std::string leading;
 
     werase(_window);
 
@@ -154,87 +154,60 @@ int ThreadView::lineCount() const
 }
 
 uint32_t ThreadView::displayMessageLine(const Message & message,
-    std::vector<chtype> & leading, bool last, int index)
+    std::string & leading, bool last, int index)
 {
+    using namespace NCurses;
+
     if (index >= _offset)
     {
-        try
+        bool selected = index == _selectedIndex;
+        bool unread = message.tags.find("unread") != message.tags.end();
+
+        Renderer r(_window, false);
+        r.move(index - _offset, 0);
+
+        attr_t attributes = 0;
+
+        if (selected)
+            attributes |= A_REVERSE;
+
+        if (unread)
+            attributes |= A_BOLD;
+
+        r.set_line_attributes(attributes);
+
+        r << set_color(Color::ThreadViewArrow) << acs << leading
+            << chchar(last ? ACS_LLCORNER : ACS_LTEE) << noacs << '>';
+
+        /* Sender */
+        r.skip(1);
+        r << set_color() << message.headers.find("From")->second;
+
+        /* Date */
+        r.skip(1);
+        r << styled(relativeTime(message.date), Color::ThreadViewDate);
+
+        /* Tags */
+        r.set_color(Color::ThreadViewTags);
+        for (auto & tag : message.tags)
         {
-            bool selected = index == _selectedIndex;
-            bool unread = message.tags.find("unread") != message.tags.end();
-
-            int x = 0;
-            int row = index - _offset;
-
-            wmove(_window, row, x);
-
-            attr_t attributes = 0;
-
-            if (selected)
-                attributes |= A_REVERSE;
-
-            if (unread)
-                attributes |= A_BOLD;
-
-            wchgat(_window, -1, attributes, 0, NULL);
-
-            x += NCurses::addPlainString(_window, leading.begin(), leading.end(),
-                attributes, Color::ThreadViewArrow);
-
-            NCurses::checkMove(_window, x);
-
-            x += NCurses::addChar(_window, last ? ACS_LLCORNER : ACS_LTEE,
-                attributes, Color::ThreadViewArrow);
-
-            NCurses::checkMove(_window, x);
-
-            x += NCurses::addChar(_window, '>', attributes, Color::ThreadViewArrow);
-
-            NCurses::checkMove(_window, ++x);
-
-            /* Sender */
-            x += NCurses::addUtf8String(_window, (*message.headers.find("From")).second.c_str(),
-                attributes);
-
-            NCurses::checkMove(_window, ++x);
-
-            /* Date */
-            x += NCurses::addPlainString(_window, relativeTime(message.date),
-                attributes, Color::ThreadViewDate);
-
-            NCurses::checkMove(_window, ++x);
-
-            /* Tags */
-            std::ostringstream tagStream;
-            std::copy(message.tags.begin(), message.tags.end(),
-                std::ostream_iterator<std::string>(tagStream, " "));
-            std::string tags(tagStream.str());
-
-            if (tags.size() > 0)
-                /* Get rid of the trailing space */
-                tags.resize(tags.size() - 1);
-
-            x += NCurses::addPlainString(_window, tags, attributes, Color::ThreadViewTags);
-
-            NCurses::checkMove(_window, x - 1);
+            r.skip(1);
+            r << tag;
         }
-        catch (const NCurses::CutOffException & e)
-        {
-            NCurses::addCutOffIndicator(_window);
-        }
+
+        r.add_cut_off_indicator();
     }
 
     ++index;
 
-    if (last)
-        leading.push_back(' ');
-    else
-        leading.push_back(ACS_VLINE);
+    leading.push_back(last ? ' ' : ACS_VLINE);
 
     for (auto reply = message.replies.begin(), e = message.replies.end();
-        reply != e && index < getmaxy(_window) + _offset;
-        ++reply)
+        reply != e; ++reply)
     {
+        if (index >= getmaxy(_window) + _offset)
+            break;
+
         index = displayMessageLine(*reply, leading, (reply + 1) == e, index);
     }
 

@@ -68,24 +68,20 @@ SearchView::~SearchView()
 
 void SearchView::update()
 {
-    werase(_window);
+    using namespace NCurses;
+
+    Renderer r(_window);
 
     if (_offset > _threads.size())
         return;
 
-    int row = 0;
-
-    for (auto thread = _threads.begin() + _offset;
-        thread != _threads.end() && row < getmaxy(_window);
-        ++thread, ++row)
+    for (auto thread = _threads.begin() + _offset, e = _threads.end();
+        thread != e && !r.off_screen(); ++thread, r.next_line())
     {
-        bool selected = row + _offset == _selectedIndex;
+        bool selected = r.row() + _offset == _selectedIndex;
         bool unread = thread->tags.find("unread") != thread->tags.end();
         bool completeMatch = thread->matchedMessages == thread->totalMessages;
 
-        int x = 0;
-
-        wmove(_window, row, x);
 
         attr_t attributes = 0;
 
@@ -95,63 +91,40 @@ void SearchView::update()
         if (selected)
             attributes |= A_REVERSE;
 
-        wchgat(_window, -1, attributes, 0, NULL);
+        r.set_line_attributes(attributes);
 
-        try
+        /* Date */
+        r.set_max_width(newestDateWidth - 1);
+        r << styled(relativeTime(thread->newestDate), Color::SearchViewDate);
+        r.advance(newestDateWidth);
+
+        /* Message Count */
+        Color message_count_color = completeMatch
+            ? Color::SearchViewMessageCountComplete
+            : Color::SearchViewMessageCountPartial;
+        r.set_max_width(messageCountWidth - 1);
+        r << set_color() << '[' << set_color(message_count_color)
+            << thread->matchedMessages << '/' << thread->totalMessages << set_color() << ']';
+        r.advance(messageCountWidth);
+
+        /* Authors */
+        r.set_max_width(authorsWidth - 1);
+        r << styled(thread->authors, Color::SearchViewAuthors);
+        r.advance(authorsWidth);
+
+        /* Subject */
+        r.set_max_width();
+        r << styled(thread->subject, Color::SearchViewSubject);
+
+        /* Tags */
+        r.set_color(Color::SearchViewTags);
+        for (auto & tag : thread->tags)
         {
-            /* Date */
-            NCurses::addPlainString(_window, relativeTime(thread->newestDate),
-                attributes, Color::SearchViewDate, newestDateWidth - 1);
-
-            NCurses::checkMove(_window, x += newestDateWidth);
-
-            /* Message Count */
-            std::ostringstream messageCountStream;
-            messageCountStream << thread->matchedMessages << '/' << thread->totalMessages;
-
-            x += NCurses::addChar(_window, '[', attributes);
-            NCurses::checkMove(_window, x);
-
-            x += NCurses::addPlainString(_window, messageCountStream.str(),
-                attributes, completeMatch ? Color::SearchViewMessageCountComplete :
-                                            Color::SearchViewMessageCountPartial,
-                messageCountWidth - 1);
-            NCurses::checkMove(_window, x);
-
-            NCurses::addChar(_window, ']', attributes);
-
-            NCurses::checkMove(_window, x = newestDateWidth + messageCountWidth);
-
-            /* Authors */
-            NCurses::addUtf8String(_window, thread->authors.c_str(),
-                attributes, Color::SearchViewAuthors, authorsWidth - 1);
-
-            NCurses::checkMove(_window, x += authorsWidth);
-
-            /* Subject */
-            x += NCurses::addUtf8String(_window, thread->subject.c_str(),
-                attributes, Color::SearchViewSubject);
-
-            NCurses::checkMove(_window, ++x);
-
-            /* Tags */
-            std::ostringstream tagStream;
-            std::copy(thread->tags.begin(), thread->tags.end(),
-                std::ostream_iterator<std::string>(tagStream, " "));
-            std::string tags(tagStream.str());
-
-            if (tags.size() > 0)
-                /* Get rid of the trailing space */
-                tags.resize(tags.size() - 1);
-
-            x += NCurses::addPlainString(_window, tags, attributes, Color::SearchViewTags);
-
-            NCurses::checkMove(_window, x - 1);
+            r.skip(1);
+            r << tag;
         }
-        catch (const NCurses::CutOffException & e)
-        {
-            NCurses::addCutOffIndicator(_window, attributes);
-        }
+
+        r.add_cut_off_indicator();
     }
 }
 

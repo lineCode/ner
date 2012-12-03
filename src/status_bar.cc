@@ -51,34 +51,23 @@ StatusBar::~StatusBar()
 
 void StatusBar::update()
 {
-    int x = 0;
-
-    werase(_statusWindow);
-    wmove(_statusWindow, 0, x);
+    using namespace NCurses;
 
     const View & view = ViewManager::instance().activeView();
 
+    Renderer r(_statusWindow);
+
     /* View Name */
-    x += NCurses::addPlainString(_statusWindow, '[' + view.name() + ']',
-        A_BOLD, Color::StatusBarStatus);
+    r << enable_attr(A_BOLD) << '[' << view.name() << ']' << clear_attr;
 
     /* Status */
     for (auto & status : view.status())
     {
-        try
-        {
-            /* Divider */
-            NCurses::checkMove(_statusWindow, ++x);
+        r.skip(1);
+        r << styled('|', Color::StatusBarStatusDivider, A_BOLD);
 
-            x += NCurses::addChar(_statusWindow, '|', A_BOLD, Color::StatusBarStatusDivider);
-
-            NCurses::checkMove(_statusWindow, ++x);
-
-            x += NCurses::addPlainString(_statusWindow, status, 0, Color::StatusBarStatus);
-        }
-        catch (const NCurses::CutOffException & e)
-        {
-        }
+        r.skip(1);
+        r << styled(status, Color::StatusBarStatus);
     }
 }
 

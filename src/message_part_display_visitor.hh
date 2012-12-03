@@ -37,9 +37,8 @@ class MessagePartDisplayVisitor : public MessagePartVisitor
         int lines() const;
 
     private:
-        WINDOW * _window;
+        NCurses::Renderer _renderer;
         View::Geometry _area;
-        int _row;
         int _messageRow;
         int _offset;
         int _selection;

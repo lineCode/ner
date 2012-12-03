@@ -44,59 +44,37 @@ SearchListView::~SearchListView()
 
 void SearchListView::update()
 {
-    werase(_window);
+    using namespace NCurses;
+
+    Renderer r(_window);
 
     if (_offset > _searches.size())
         return;
 
-    int row = 0;
-
-    for (auto search = _searches.begin();
-        search != _searches.end() && row < getmaxy(_window);
-        ++search, ++row)
+    for (auto search = _searches.begin() + _offset;
+        search != _searches.end() && !r.off_screen(); ++search, r.next_line())
     {
-        bool selected = row + _offset == _selectedIndex;
+        bool selected = r.row() + _offset == _selectedIndex;
 
-        int x = 0;
+        r.set_line_attributes(selected ? A_REVERSE : 0);
 
-        wmove(_window, row, x);
+        /* Search Name */
+        r.set_max_width(searchNameWidth - 1);
+        r << styled(search->name, Color::SearchListViewName);
+        r.advance(searchNameWidth);
 
-        attr_t attributes = 0;
+        /* Search Terms */
+        r.set_max_width(searchTermsWidth - 1);
+        r << styled(search->query, Color::SearchListViewTerms);
+        r.advance(searchTermsWidth);
 
-        if (selected)
-            attributes |= A_REVERSE;
+        /* Number of Results */
+        notmuch_query_t * query = notmuch_query_create(Database(), search->query.c_str());
+        r << set_color(Color::SearchListViewResults)
+            << notmuch_query_count_messages(query) << " results";
+        notmuch_query_destroy(query);
 
-        wchgat(_window, -1, attributes, 0, NULL);
-
-        try
-        {
-            /* Search Name */
-            NCurses::addUtf8String(_window, search->name.c_str(), attributes,
-                Color::SearchListViewName, searchNameWidth - 1);
-
-            NCurses::checkMove(_window, x += searchNameWidth);
-
-            /* Search Terms */
-            NCurses::addUtf8String(_window, search->query.c_str(), attributes,
-                Color::SearchListViewTerms, searchTermsWidth - 1);
-
-            NCurses::checkMove(_window, x += searchTermsWidth);
-
-            /* Number of Results */
-            std::ostringstream results;
-            notmuch_query_t * query = notmuch_query_create(Database(), search->query.c_str());
-            results << notmuch_query_count_messages(query) << " results";
-            notmuch_query_destroy(query);
-
-            NCurses::addPlainString(_window, results.str(), attributes,
-                Color::SearchListViewResults);
-
-            NCurses::checkMove(_window, x - 1);
-        }
-        catch (const NCurses::CutOffException & e)
-        {
-            NCurses::addCutOffIndicator(_window, attributes);
-        }
+        r.add_cut_off_indicator();
     }
 }
 

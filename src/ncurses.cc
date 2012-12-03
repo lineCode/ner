@@ -1,6 +1,6 @@
 /* ner: src/ncurses.cc
  *
- * Copyright (c) 2010 Michael Forney
+ * Copyright (c) 2010, 2012 Michael Forney
  *
  * This file is a part of ner.
  *
@@ -17,10 +17,15 @@
  * ner.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cassert>
+
 #include "ncurses.hh"
 
 namespace NCurses
 {
+    const size_t cchar_buffer_size = 256;
+    const int state_index = std::ios_base::xalloc();
+
     void initialize(const ColorMap & color_map)
     {
         /* Initialize the screen */
@@ -53,111 +58,168 @@ namespace NCurses
         endwin();
     }
 
-    CutOffException::~CutOffException() throw ()
+    template <>
+    Buffer<char>::Buffer(std::vector<cchar_t> & cchar_buffer, State & render_state)
+        : std::streambuf(), _conversion_state(), _cchars(cchar_buffer), _state(render_state)
     {
+        typedef std::codecvt<wchar_t, char, std::mbstate_t> codecvt;
+
+        std::locale locale(getloc());
+
+        assert(std::has_facet<codecvt>(locale));
+        _codec = &std::use_facet<codecvt>(locale);
     }
 
-    const char * CutOffException::what() throw ()
+    template <>
+    bool Buffer<char>::get_wc(const char *& from, const char * from_end, wchar_t & wc)
     {
-        return "Line cut off past screen";
+        /* Unused, but we need it as an argument to codecvt::in. */
+        wchar_t * wc_next;
+
+        auto result = _codec->in(_conversion_state, from, from_end, from,
+            &wc, &wc + 1, wc_next);
+
+        return result == std::codecvt_base::ok
+            || result == std::codecvt_base::partial && &wc + 1 == wc_next;
     }
 
-    void checkMove(WINDOW * window, int x)
+    Renderer::Renderer(WINDOW * window, bool erase)
+        : Stream<char>(_cchars, _state), _window(window), _off_screen(false), _row(0)
     {
-        if (wmove(window, getcury(window), x) == ERR)
-            throw CutOffException();
+        _cchars.reserve(cchar_buffer_size);
+        wmove(_window, 0, 0);
+
+        if (erase)
+            werase(_window);
     }
 
-    void addCutOffIndicator(WINDOW * window, attr_t attributes)
+    Renderer::~Renderer()
     {
-        wmove(window, getcury(window), getmaxx(window) - 1);
-        waddch(window, '$' | attributes | COLOR_PAIR(Color::CutOffIndicator));
+        /* Add whatever is in the render buffer to the screen. */
+        render();
     }
 
-    int addPlainString(WINDOW * window, const std::string & string,
-        attr_t attributes, Color color, int maxLength)
+    void Renderer::set_color(Color color)
     {
-        return addPlainString(window, string.begin(), string.end(), attributes, color, maxLength);
+        _state.color = color;
     }
 
-    int addPlainString(WINDOW * window, const char * string,
-        attr_t attributes, Color color, int maxLength)
+    void Renderer::set_line_attributes(attr_t attributes)
     {
-        return addPlainString(window, string, string + std::strlen(string), attributes, color, maxLength);
+        wchgat(_window, -1, attributes, 0, NULL);
+        _state.attributes = attributes;
     }
 
-    int addUtf8String(WINDOW * window, const char * string,
-        attr_t attributes, Color color, int maxLength)
+    void Renderer::set_max_width(size_t max_width)
     {
-        mbstate_t state = { 0 };
+        _state.max_width = max_width;
+    }
 
-        int length = strlen(string);
+    void Renderer::move(int y, int x)
+    {
+        render();
 
-        cchar_t displayCharacters[length + 1];
-        int displayIndex = 0;
-        int displayLength = 0;
+        set_off_screen(wmove(_window, _row = y, x) == ERR);
+    }
 
-        wchar_t wideCharacters[CCHARW_MAX + 1];
-        wchar_t wideCharacter;
-        int wideIndex = 0;
+    void Renderer::advance(size_t amount)
+    {
+        if (_off_screen)
+            return;
 
-        for (int position = 0; position < length;)
+        move(getcury(_window), getcurx(_window) + amount);
+    }
+
+    void Renderer::skip(size_t amount)
+    {
+        if (_off_screen)
+            return;
+
+        if (amount > _state.max_width - _state.display_width)
+            set_off_screen();
+        else
         {
-            int bytesRead = std::mbrtowc(&wideCharacter,
-                string + position, length - position, &state);
+            advance(_state.display_width + amount);
+            _state.max_width -= amount;
+        }
+    }
 
-            position += bytesRead;
+    void Renderer::next_line()
+    {
+        move(++_row, 0);
+    }
 
-            if (bytesRead < 0)
-                break;
+    bool Renderer::off_screen() const
+    {
+        return _off_screen;
+    }
 
-            int width = wcwidth(wideCharacter);
+    int Renderer::row() const
+    {
+        return _row;
+    }
 
-            if (width > 0)
-                displayLength += width;
+    size_t Renderer::render()
+    {
+        size_t columns = _state.display_width;
 
-            if (displayLength > maxLength)
-                break;
+        if (!_cchars.empty())
+        {
+            if (getcurx(_window) + _state.display_width > getmaxx(_window))
+                set_off_screen();
 
-            /* We found a new spacing character, set the next cchar_t */
-            if ((width > 0 && wideIndex > 0) || wideIndex == CCHARW_MAX)
-            {
-                wideCharacters[wideIndex] = L'\0';
-                setcchar(&displayCharacters[displayIndex++], wideCharacters,
-                    attributes, color, NULL);
-
-                /* Start the next display character */
-                wideIndex = 0;
-            }
-            else if (width == 0 && wideIndex == 0)
-                wideCharacters[wideIndex++] = L' ';
-            else if (width < 0)
-                break;
-
-            wideCharacters[wideIndex++] = wideCharacter;
+            wadd_wchnstr(_window, _cchars.data(), _cchars.size());
+            _cchars.clear();
+            _state.display_width = 0;
         }
 
-        if (wideIndex > 0)
-        {
-            wideCharacters[wideIndex] = L'\0';
-            setcchar(&displayCharacters[displayIndex++], wideCharacters,
-                attributes, color, NULL);
-        }
-
-        /* Set the NULL cchar_t */
-        wideCharacters[0] = L'\0';
-        setcchar(&displayCharacters[displayIndex], wideCharacters, 0, 0, NULL);
-
-        wadd_wchnstr(window, displayCharacters, displayIndex);
-
-        return displayLength;
+        return columns;
     }
 
-    int addChar(WINDOW * window, chtype character, int attributes, Color color)
+    void Renderer::add_cut_off_indicator()
     {
-        character |= attributes | COLOR_PAIR(color);
-        waddchnstr(window, &character, 1);
-        return 1;
+        render();
+
+        if (_off_screen)
+            mvwaddch(_window, getcury(_window), getmaxx(_window) - 1,
+                '$' | _state.attributes | COLOR_PAIR(Color::CutOffIndicator));
+    }
+
+    void Renderer::set_off_screen(bool off)
+    {
+        _off_screen = off;
+
+        if (off)
+            setstate(std::ios_base::failbit);
+        else
+            clear();
+    }
+
+    std::ios_base & acs(std::ios_base & ios)
+    {
+        void * pointer = ios.pword(state_index);
+        if (pointer)
+            static_cast<State *>(pointer)->attributes |= A_ALTCHARSET;
+
+        return ios;
+    }
+
+    std::ios_base & noacs(std::ios_base & ios)
+    {
+        void * pointer = ios.pword(state_index);
+        if (pointer)
+            static_cast<State *>(pointer)->attributes &= ~A_ALTCHARSET;
+
+        return ios;
+    }
+
+    std::ios_base & clear_attr(std::ios_base & ios)
+    {
+        void * pointer = ios.pword(state_index);
+        if (pointer)
+            static_cast<State *>(pointer)->attributes = 0;
+
+        return ios;
     }
 }
 

@@ -87,63 +87,58 @@ void EmailView::setVisibleHeaders(const std::vector<std::string> & headers)
 
 void EmailView::update()
 {
+    using namespace NCurses;
+
     int row = 0;
 
     _partsEndLine.clear();
-    werase(_window);
 
-    for (auto header = _visibleHeaders.begin(), e = _visibleHeaders.end(); header != e; ++header, ++row)
+    Renderer r(_window);
+
+    for (auto & header : _visibleHeaders)
     {
-        int x = 0;
+        if (r.off_screen())
+            return;
 
-        wmove(_window, row, x);
+        r << set_color(Color::EmailViewHeader) << header << ':';
+        r.skip(1);
+        r << set_color() << _headers[header];
 
-        try
-        {
-            x += NCurses::addPlainString(_window, (*header) + ": ",
-                0, Color::EmailViewHeader);
-
-            NCurses::checkMove(_window, x);
-
-            x += NCurses::addUtf8String(_window, _headers[*header].c_str());
-
-            NCurses::checkMove(_window, x - 1);
-        }
-        catch (const NCurses::CutOffException & e)
-        {
-            NCurses::addCutOffIndicator(_window);
-        }
+        r.add_cut_off_indicator();
+        r.next_line();
     }
 
-    wmove(_window, row, 0);
     whline(_window, 0, _geometry.width);
-    ++row;
+    r.next_line();
 
-    MessagePartDisplayVisitor displayVisitor(_window, View::Geometry{ 0, row,
+    MessagePartDisplayVisitor displayVisitor(_window, View::Geometry{ 0, r.row(),
         _geometry.width, visibleLines() }, _offset, _selectedIndex);
 
-
-    for (auto part = _parts.begin(), e = _parts.end(); part != e; ++part)
+    for (auto & part : _parts)
     {
-        (*part)->accept(displayVisitor);
+        part->accept(displayVisitor);
         _partsEndLine.push_back(displayVisitor.lines());
     }
 
-    row = displayVisitor.row();
+    r.move(displayVisitor.row(), 0);
     _lineCount = displayVisitor.lines();
 
-    for (; row < getmaxy(_window); ++row)
-        mvwaddch(_window, row, 0, '~' | A_BOLD | COLOR_PAIR(Color::EmptySpaceIndicator));
+    for (; !r.off_screen(); r.next_line())
+        r << styled('~', Color::EmptySpaceIndicator, A_BOLD);
 
-    wattron(_window, COLOR_PAIR(Color::MoreLessIndicator));
+    r.set_color(Color::MoreLessIndicator);
 
     if (_offset > 0)
-        mvwaddstr(_window, _visibleHeaders.size() + 1, _geometry.width - lessMessage.size(), lessMessage.c_str());
+    {
+        r.move(_visibleHeaders.size() + 1, _geometry.width - lessMessage.size());
+        r << lessMessage;
+    }
 
     if (_offset + visibleLines() < _lineCount)
-        mvwaddstr(_window, getmaxy(_window) - 1, _geometry.width - moreMessage.size(), moreMessage.c_str());
-
-    wattroff(_window, COLOR_PAIR(Color::MoreLessIndicator));
+    {
+        r.move(getmaxy(_window) - 1, _geometry.width - moreMessage.size());
+        r << moreMessage;
+    }
 }
 
 EmailView::PartList::iterator EmailView::selectedPart()
