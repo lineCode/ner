@@ -30,7 +30,7 @@
 #include "ner_config.hh"
 #include "message_part.hh"
 
-std::string relativeTime(time_t rawTime);
+std::string relativeTime(time_t time);
 
 std::string formatByteSize(long size);
 

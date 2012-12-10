@@ -24,53 +24,45 @@
 
 #include "util.hh"
 
-#define MINUTE (60)
-#define HOUR (60 * MINUTE)
-#define DAY (24 * HOUR)
-
-std::string relativeTime(time_t rawTime)
+std::string relativeTime(time_t time)
 {
-    time_t currentRawTime = time(0);
-    struct tm currentLocalTime, localTime;
-    char timeString[13];
+    using namespace std::chrono;
 
-    if (rawTime > currentRawTime)
+    typedef duration<int, std::ratio<86400>> days;
+
+    auto now = system_clock::now();
+    auto then = system_clock::from_time_t(time);
+
+    if (then > now)
         return "the future";
 
-    localtime_r(&currentRawTime, &currentLocalTime);
-    localtime_r(&rawTime, &localTime);
+    time_t current_time = system_clock::to_time_t(now);
 
-    time_t difference = currentRawTime - rawTime;
+    auto difference = now - then;
+    struct tm local_time = *std::localtime(&time);
+    struct tm current_local_time = *std::localtime(&current_time);
 
-    if (difference > 180 * DAY)
+    /* std::put_time is not available in GCC yet (part of C++11). */
+
+    char string[16];
+
+    if (difference > days(180))
+        strftime(string, sizeof(string), "%F", &local_time);
+    else if (difference < hours(1))
+        snprintf(string, sizeof(string), "%lu mins. ago", duration_cast<minutes>(difference).count());
+    else if (difference < days(7))
     {
-        strftime(timeString, sizeof(timeString), "%F", &localTime);
-    }
-    else if (difference < HOUR)
-    {
-        snprintf(timeString, sizeof(timeString), "%u mins. ago", difference / MINUTE);
-    }
-    else if (difference < 7 * DAY)
-    {
-        if (localTime.tm_wday == currentLocalTime.tm_wday && difference < DAY)
-        {
-            strftime(timeString, sizeof(timeString), "Today %R", &localTime);
-        }
-        else if ((currentLocalTime.tm_wday + 7 - localTime.tm_wday) % 7 == 1)
-        {
-            strftime(timeString, sizeof(timeString), "Yest. %R", &localTime);
-        }
+        if (local_time.tm_wday == current_local_time.tm_wday && difference < days(1))
+            strftime(string, sizeof(string), "Today %R", &local_time);
+        else if ((current_local_time.tm_wday + 7 - local_time.tm_wday) % 7 == 1)
+            strftime(string, sizeof(string), "Yest. %R", &local_time);
         else
-        {
-            strftime(timeString, sizeof(timeString), "%a. %R", &localTime);
-        }
+            strftime(string, sizeof(string), "%a. %R", &local_time);
     }
     else
-    {
-        strftime(timeString, sizeof(timeString), "%B %d", &localTime);
-    }
+        strftime(string, sizeof(string), "%B %d", &local_time);
 
-    return std::string(timeString);
+    return string;
 }
 
 std::string formatByteSize(long size)
