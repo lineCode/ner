@@ -15,12 +15,9 @@ AX_CXX_COMPILE_STDCXX_11
 PKG_PROG_PKG_CONFIG([0.9.0])
 
 dnl Check for libraries {{{
-PKG_CHECK_MODULES([gmime], [gmime-2.4],,
-    [AC_MSG_ERROR([ner requires gmime])])
-PKG_CHECK_MODULES([gio], [gio-2.0],,
-    [AC_MSG_ERROR([ner requires gio])])
-PKG_CHECK_MODULES([yaml_cpp], [yaml-cpp >= 0.3.0],,
-    [AC_MSG_ERROR([ner requires yaml-cpp>=0.3.0])])
+PKG_CHECK_MODULES([gmime], [gmime-2.4])
+PKG_CHECK_MODULES([gio], [gio-2.0])
+PKG_CHECK_MODULES([yaml_cpp], [yaml-cpp >= 0.3.0])
 AC_CHECK_LIB(notmuch, notmuch_database_open,,
     [AC_MSG_ERROR([ner requires libnotmuch])])
 AC_CHECK_LIB(ncursesw, initscr,,
