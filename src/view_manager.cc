@@ -93,6 +93,12 @@ void ViewManager::closeActiveView()
     }
 }
 
+void ViewManager::close_all_views()
+{
+    _views.clear();
+    _activeView = nullptr;
+}
+
 void ViewManager::update()
 {
     _activeView->update();

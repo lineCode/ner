@@ -67,6 +67,11 @@ class ViewManager : public InputHandler
          */
         void closeActiveView();
 
+        /**
+         * Closes all views.
+         */
+        void close_all_views();
+
         void update();
         void refresh();
         void resize();

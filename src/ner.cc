@@ -94,6 +94,8 @@ void Ner::run()
             }
         }
     }
+
+    _viewManager.close_all_views();
 }
 
 void Ner::quit()
