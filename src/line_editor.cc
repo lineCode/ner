@@ -102,7 +102,7 @@ bool LineEditor::line(std::string & result, const std::string & field,
                     position = response->end();
                 }
                 break;
-            case 'h' - 96:
+            case ctrl('h'):
             case KEY_BACKSPACE:
             case 127:
                 if (position > response->begin())
@@ -121,17 +121,17 @@ bool LineEditor::line(std::string & result, const std::string & field,
             case '\t':
                 /* TODO: Auto complete */
                 break;
-            case 'u' - 96:
+            case ctrl('u'):
                 position = response->erase(response->begin(), position);
                 break;
-            case 'w' - 96:
+            case ctrl('w'):
                 /* Erase all characters from the beginning of the previous word
                  * (see KEY_SLEFT handler) to the cursor position. */
                 position = response->erase(std::find(std::find_if(
                     std::string::reverse_iterator(position), response->rend(), notSpace),
                     response->rend(), ' ').base(), position);
                 break;
-            case 'c' - 96:
+            case ctrl('c'):
                 history.pop_back();
                 result = std::string();
                 return false;

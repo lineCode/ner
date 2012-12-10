@@ -30,6 +30,11 @@
 #include "ner_config.hh"
 #include "message_part.hh"
 
+constexpr char ctrl(char c)
+{
+    return c - 96;
+}
+
 std::string relativeTime(time_t time);
 
 std::string formatByteSize(long size);

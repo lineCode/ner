@@ -69,7 +69,7 @@ void Ner::run()
 
         if (key == KEY_BACKSPACE && sequence.size() > 0)
             sequence.pop_back();
-        else if (key == 'c' - 96) // Ctrl-C
+        else if (key == ctrl('c'))
             sequence.clear();
         else
         {
