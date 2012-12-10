@@ -37,14 +37,14 @@ MessageView::~MessageView()
 {
 }
 
-void MessageView::setMessage(const std::string & messageId)
+void MessageView::setMessage(const std::string & id)
 {
     notmuch_message_t * message;
 
-    notmuch_database_find_message(Database(), messageId.c_str(), &message);
+    notmuch_database_find_message(Database(), id.c_str(), &message);
 
     if (!message)
-        throw InvalidMessageException(messageId);
+        throw InvalidMessageException(id);
 
     std::string filename = notmuch_message_get_filename(message);
 

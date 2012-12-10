@@ -61,7 +61,7 @@ namespace Notmuch
     class InvalidThreadException : public std::exception
     {
         public:
-            InvalidThreadException(const std::string & threadId);
+            InvalidThreadException(const std::string & id);
             ~InvalidThreadException() throw();
 
             virtual const char * what() const throw();
@@ -73,7 +73,7 @@ namespace Notmuch
     class InvalidMessageException : public std::exception
     {
         public:
-            InvalidMessageException(const std::string & messageId);
+            InvalidMessageException(const std::string & id);
             ~InvalidMessageException() throw();
 
             virtual const char * what() const throw();

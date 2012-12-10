@@ -110,10 +110,10 @@ void EmailEditView::send()
     char hostname[256];
     gethostname(hostname, sizeof(hostname));
 
-    std::ostringstream messageId;
-    messageId << timeValue.tv_sec << '-' << "ner" << '-' << rand() % 10000 << '@' << hostname;
+    std::ostringstream id;
+    id << timeValue.tv_sec << '-' << "ner" << '-' << rand() % 10000 << '@' << hostname;
 
-    g_mime_message_set_message_id(message, messageId.str().c_str());
+    g_mime_message_set_message_id(message, id.str().c_str());
 
     if (_parts.size() > 1)
     {

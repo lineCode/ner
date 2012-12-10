@@ -31,7 +31,7 @@ class MessageView : public EmailView
         MessageView(const View::Geometry & geometry = View::Geometry());
         virtual ~MessageView();
 
-        void setMessage(const std::string & messageId);
+        void setMessage(const std::string & id);
 
         virtual std::string name() const { return "message-view"; }
 };

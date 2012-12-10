@@ -25,7 +25,7 @@
 class ReplyView : public EmailEditView
 {
     public:
-        ReplyView(const std::string & messageId, const View::Geometry & geometry = View::Geometry());
+        ReplyView(const std::string & id, const View::Geometry & geometry = View::Geometry());
         virtual ~ReplyView();
 
         virtual std::string name() const { return "reply-view"; }

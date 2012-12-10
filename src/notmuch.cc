@@ -66,8 +66,8 @@ namespace Notmuch
         return database;
     }
 
-    InvalidThreadException::InvalidThreadException(const std::string & threadId)
-        : _id(threadId)
+    InvalidThreadException::InvalidThreadException(const std::string & id)
+        : _id(id)
     {
     }
 
@@ -80,8 +80,8 @@ namespace Notmuch
         return ("Cannot find thread with ID: " + _id).c_str();
     }
 
-    InvalidMessageException::InvalidMessageException(const std::string & messageId)
-        : _id(messageId)
+    InvalidMessageException::InvalidMessageException(const std::string & id)
+        : _id(id)
     {
     }
 
