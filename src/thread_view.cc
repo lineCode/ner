@@ -32,52 +32,9 @@
 
 using namespace Notmuch;
 
-ThreadView::ThreadView(const std::string & threadId, const View::Geometry & geometry)
-    : LineBrowserView(geometry), _id(threadId)
+ThreadView::ThreadView(const View::Geometry & geometry)
+    : LineBrowserView(geometry)
 {
-    notmuch_query_t * query = notmuch_query_create(Database(), ("thread:" + threadId).c_str());
-    notmuch_threads_t * threads = notmuch_query_search_threads(query);
-    notmuch_thread_t * thread = 0;
-    notmuch_messages_t * messages;
-
-    if (!notmuch_threads_valid(threads) || !(thread = notmuch_threads_get(threads)))
-    {
-        notmuch_threads_destroy(threads);
-        notmuch_query_destroy(query);
-
-        throw InvalidThreadException(threadId);
-    }
-
-    for (messages = notmuch_thread_get_toplevel_messages(thread);
-        notmuch_messages_valid(messages);
-        notmuch_messages_move_to_next(messages))
-    {
-        _topMessages.push_back(notmuch_messages_get(messages));
-    }
-
-    notmuch_messages_destroy(messages);
-    notmuch_threads_destroy(threads);
-    notmuch_query_destroy(query);
-
-    _messageCount = notmuch_thread_get_total_messages(thread);
-
-    _selectedIndex = 0;
-
-    /* Find first unread message */
-    int messageIndex = 0;
-
-    for (Message::const_iterator message(_topMessages.rbegin(), _topMessages.rend()), e;
-        message != e; ++message, ++messageIndex)
-    {
-        if (message->tags.find("unread") != message->tags.end())
-        {
-            _selectedIndex = messageIndex;
-            break;
-        }
-    }
-
-    makeSelectionVisible();
-
     /* Key Sequences */
     addHandledSequence("\n", std::bind(&ThreadView::openSelectedMessage, this));
     addHandledSequence("r", std::bind(&ThreadView::reply, this));
@@ -113,6 +70,54 @@ std::vector<std::string> ThreadView::status() const
         "thread:" + _id,
         messagePosition.str()
     };
+}
+
+void ThreadView::set_thread(const std::string & id)
+{
+    _id = id;
+
+    notmuch_query_t * query = notmuch_query_create(Database(), ("thread:" + id).c_str());
+    notmuch_threads_t * threads = notmuch_query_search_threads(query);
+    notmuch_thread_t * thread;
+    notmuch_messages_t * messages;
+
+    if (!notmuch_threads_valid(threads) || !(thread = notmuch_threads_get(threads)))
+    {
+        notmuch_threads_destroy(threads);
+        notmuch_query_destroy(query);
+
+        throw InvalidThreadException(id);
+    }
+
+    for (messages = notmuch_thread_get_toplevel_messages(thread);
+        notmuch_messages_valid(messages);
+        notmuch_messages_move_to_next(messages))
+    {
+        _topMessages.push_back(notmuch_messages_get(messages));
+    }
+
+    notmuch_messages_destroy(messages);
+    notmuch_threads_destroy(threads);
+    notmuch_query_destroy(query);
+
+    _messageCount = notmuch_thread_get_total_messages(thread);
+
+    _selectedIndex = 0;
+
+    /* Find first unread message */
+    int messageIndex = 0;
+
+    for (Message::const_iterator message(_topMessages.rbegin(), _topMessages.rend()), e;
+        message != e; ++message, ++messageIndex)
+    {
+        if (message->tags.find("unread") != message->tags.end())
+        {
+            _selectedIndex = messageIndex;
+            break;
+        }
+    }
+
+    makeSelectionVisible();
 }
 
 void ThreadView::openSelectedMessage()

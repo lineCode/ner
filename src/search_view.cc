@@ -151,8 +151,9 @@ void SearchView::openSelectedThread()
     {
         try
         {
-            ViewManager::instance().addView(std::make_shared<ThreadMessageView>(
-                _threads.at(_selectedIndex).id));
+            auto thread_view = std::make_shared<ThreadMessageView>();
+            thread_view->set_thread(_threads.at(_selectedIndex).id);
+            ViewManager::instance().addView(thread_view);
         }
         catch (const InvalidThreadException & e)
         {

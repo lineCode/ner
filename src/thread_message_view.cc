@@ -23,15 +23,13 @@
 
 const int threadViewHeight = 8;
 
-ThreadMessageView::ThreadMessageView(const std::string & threadId, const View::Geometry & geometry)
-    : _threadView(threadId, { geometry.x, geometry.y, geometry.width, threadViewHeight }),
+ThreadMessageView::ThreadMessageView(const View::Geometry & geometry)
+    : _threadView({ geometry.x, geometry.y, geometry.width, threadViewHeight }),
         _messageView({
             geometry.x, geometry.y + threadViewHeight + 1,
             geometry.width, geometry.height - threadViewHeight - 1
         })
 {
-    _messageView.setMessage(_threadView.selectedMessage().id);
-
     /* Key Sequences */
     addHandledSequence("j",          std::bind(&MessageView::next, &_messageView));
     addHandledSequence("<Down>",     std::bind(&MessageView::next, &_messageView));
@@ -82,6 +80,12 @@ void ThreadMessageView::resize(const View::Geometry & geometry)
         geometry.x, threadViewHeight + 1,
         geometry.width, geometry.height - threadViewHeight - 1
     });
+}
+
+void ThreadMessageView::set_thread(const std::string & id)
+{
+    _threadView.set_thread(id);
+    loadSelectedMessage();
 }
 
 void ThreadMessageView::nextMessage()

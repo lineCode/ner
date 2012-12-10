@@ -26,8 +26,7 @@
 class ThreadMessageView : public View
 {
     public:
-        ThreadMessageView(const std::string & threadId,
-            const View::Geometry & geometry = View::Geometry());
+        ThreadMessageView(const View::Geometry & geometry = View::Geometry());
         virtual ~ThreadMessageView();
 
         virtual void update();
@@ -36,6 +35,8 @@ class ThreadMessageView : public View
 
         virtual std::string name() const { return "thread-message-view"; }
         virtual std::vector<std::string> status() const;
+
+        void set_thread(const std::string & id);
 
         void nextMessage();
         void previousMessage();

@@ -150,7 +150,9 @@ void Ner::openThread()
     {
         try
         {
-            _viewManager.addView(std::make_shared<ThreadView>(id));
+            auto threadView = std::make_shared<ThreadView>();
+            threadView->set_thread(id);
+            _viewManager.addView(threadView);
         }
         catch (const InvalidThreadException & e)
         {

@@ -28,13 +28,14 @@
 class ThreadView : public LineBrowserView
 {
     public:
-        ThreadView(const std::string & threadId,
-            const View::Geometry & geometry = View::Geometry());
+        ThreadView(const View::Geometry & geometry = View::Geometry());
         virtual ~ThreadView();
 
         virtual void update();
         virtual std::string name() const { return "thread-view"; }
         virtual std::vector<std::string> status() const;
+
+        void set_thread(const std::string & id);
 
         const Notmuch::Message & selectedMessage() const;
         virtual void openSelectedMessage();
