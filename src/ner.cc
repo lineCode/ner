@@ -60,11 +60,11 @@ void Ner::run()
     std::vector<int> sequence;
 
     _running = true;
-
-    _viewManager.refresh();
-
     while (_running)
     {
+        _viewManager.update();
+        _viewManager.refresh();
+
         int key = getch();
 
         if (key == KEY_BACKSPACE && sequence.size() > 0)
@@ -93,12 +93,6 @@ void Ner::run()
                     sequence.clear();
             }
         }
-
-        if (!_running)
-            break;
-
-        _viewManager.update();
-        _viewManager.refresh();
     }
 }
 
@@ -126,18 +120,18 @@ void Ner::compose()
 
 void Ner::openMessage()
 {
-    std::string messageId;
+    std::string id;
 
-    if (StatusBar::instance().prompt(messageId, "Message ID: ", "message-id")
-        && !messageId.empty())
+    if (StatusBar::instance().prompt(id, "Message ID: ", "message-id")
+        && !id.empty())
     {
-        if (messageId.size() > 3 && std::equal(messageId.begin(), messageId.begin() + 3, "id:"))
-            messageId.erase(0, 3);
+        if (id.size() > 3 && std::equal(id.begin(), id.begin() + 3, "id:"))
+            id.erase(0, 3);
 
         try
         {
             std::shared_ptr<MessageView> messageView(new MessageView());
-            messageView->setMessage(messageId);
+            messageView->setMessage(id);
             _viewManager.addView(std::move(messageView));
         }
         catch (const InvalidMessageException & e)
@@ -149,14 +143,14 @@ void Ner::openMessage()
 
 void Ner::openThread()
 {
-    std::string threadId;
+    std::string id;
 
-    if (StatusBar::instance().prompt(threadId, "Thread ID: ", "thread-id")
-        && !threadId.empty())
+    if (StatusBar::instance().prompt(id, "Thread ID: ", "thread-id")
+        && !id.empty())
     {
         try
         {
-            _viewManager.addView(std::make_shared<ThreadView>(threadId));
+            _viewManager.addView(std::make_shared<ThreadView>(id));
         }
         catch (const InvalidThreadException & e)
         {

@@ -115,7 +115,9 @@ void NerConfig::load()
                     sort_mode = NOTMUCH_SORT_OLDEST_FIRST;
                 else if (sortModeStr == std::string("message_id"))
                     sort_mode = NOTMUCH_SORT_MESSAGE_ID;
-                else if (sortModeStr != std::string("newest_first"))
+                else if (sortModeStr == std::string("newest_first"))
+                    sort_mode = NOTMUCH_SORT_NEWEST_FIRST;
+                else
                 {
                     /* FIXME: throw? */
                 }

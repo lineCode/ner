@@ -21,7 +21,7 @@
 
 #include "colors.hh"
 
-std::map<Color, ColorPair> defaultColorMap = {
+ColorMap defaultColorMap = {
     /* General */
     { Color::CutOffIndicator,           ColorPair{ COLOR_GREEN,  COLOR_BLACK } },
     { Color::MoreLessIndicator,         ColorPair{ COLOR_BLACK,  COLOR_GREEN } },

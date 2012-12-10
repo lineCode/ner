@@ -22,7 +22,7 @@
 #define NER_UTIL_H 1
 
 #include <string>
-#include <time.h>
+#include <ctime>
 #include <gmime/gmime.h>
 
 #include "gmime_iostream.hh"

@@ -83,8 +83,8 @@ int main(int argc, char * argv[])
 
     std::signal(SIGWINCH, &resize);
 
-    if (NerConfig::instance().refresh_view)
-        /* Refresh the view every minute (or when the user presses a key). */
+    /* Refresh the view every minute (or when the user presses a key). */
+    if (config.refresh_view)
         timeout(60000);
 
     Ner ner;

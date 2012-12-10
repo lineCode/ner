@@ -147,8 +147,8 @@ ReplyView::ReplyView(const std::string & messageId, const View::Geometry & geome
 
     /* Set content */
     std::ostringstream messageContentStream;
-    messageContentStream << "On " << g_mime_message_get_date_as_string(originalMessage) << ", ";
-    messageContentStream << g_mime_message_get_sender(originalMessage) << " wrote:" << std::endl << "> ";
+    messageContentStream << "On " << g_mime_message_get_date_as_string(originalMessage) << ", "
+        << g_mime_message_get_sender(originalMessage) << " wrote:" << std::endl << "> ";
 
     GMimeObject * part = g_mime_message_get_mime_part(originalMessage);
 

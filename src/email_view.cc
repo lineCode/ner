@@ -160,7 +160,7 @@ void EmailView::saveSelectedPart()
 void EmailView::toggleSelectedPartFolding()
 {
     PartList::iterator part = selectedPart();
-    (*part)->folded = not (*part)->folded;
+    (*part)->folded = !(*part)->folded;
 
     if (part != _parts.begin())
         _selectedIndex = _partsEndLine[std::distance(_parts.begin(), part) - 1];

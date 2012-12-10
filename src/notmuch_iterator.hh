@@ -52,7 +52,7 @@ namespace Notmuch
     class Iterator : public std::iterator<std::input_iterator_tag, T>
     {
         public:
-            Iterator(C * collection)
+            explicit Iterator(C * collection)
                 : _collection(collection)
             {
             }
@@ -85,8 +85,6 @@ namespace Notmuch
                 return !operator==(other);
             }
 
-            bool at_end() const;
-
         private:
             typedef T (* GetFunction)(C *);
             typedef notmuch_bool_t (* ValidFunction)(C *);
@@ -107,13 +105,13 @@ namespace Notmuch
     {
         public:
             template <class InputIterator>
-                explicit MessageTreeIterator(InputIterator begin, InputIterator end)
+            explicit MessageTreeIterator(InputIterator begin, InputIterator end)
             {
                 std::copy(begin, end, std::back_inserter(messages));
             }
 
             template <class Container>
-                explicit MessageTreeIterator(const Container & container)
+            explicit MessageTreeIterator(const Container & container)
             {
                 std::copy(container.begin(), container.end(), std::back_inserter(messages));
             }

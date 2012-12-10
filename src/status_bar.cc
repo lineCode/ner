@@ -117,17 +117,16 @@ bool StatusBar::prompt(std::string & result, const std::string & message,
     waddstr(_promptWindow, message.c_str());
     wrefresh(_promptWindow);
 
-    auto clearWindow = onScopeEnd([this] { 
-        wattroff(_promptWindow, COLOR_PAIR(Color::StatusBarPrompt));
-
-        /* Clear the prompt window after we're done */
-        werase(_promptWindow);
-        wrefresh(_promptWindow);
-    });
-
     LineEditor editor(_promptWindow, getcurx(_promptWindow), 0);
+    bool status = editor.line(result, field, initialValue);
 
-    return editor.line(result, field, initialValue);
+    wattroff(_promptWindow, COLOR_PAIR(Color::StatusBarPrompt));
+
+    /* Clear the prompt window after we're done */
+    werase(_promptWindow);
+    wrefresh(_promptWindow);
+
+    return status;
 }
 
 void StatusBar::delayedClearMessage(int delay)
