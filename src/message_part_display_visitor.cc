@@ -83,7 +83,7 @@ void MessagePartDisplayVisitor::visit(const TextPart & part)
             }
         }
 
-        for (auto lineWrapper = LineWrapper(line, _area.width-1); !lineWrapper.done(); ++_messageRow)
+        for (auto lineWrapper = LineWrapper(line, _area.width - 2); !lineWrapper.done(); ++_messageRow)
         {
             bool selected = _messageRow == _selection;
             bool wrapped = lineWrapper.wrapped();
