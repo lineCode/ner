@@ -182,27 +182,34 @@ void EmailEditView::attach()
     }
 
     GError* error = NULL;
-    auto file = autoUnref(g_file_new_for_path(filename.c_str()));
-    auto fileinfo = autoUnref(g_file_query_info(file,
-                                                G_FILE_ATTRIBUTE_STANDARD_TYPE ","  G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
-                                                G_FILE_QUERY_INFO_NONE, NULL, &error));
+    GFile * file = g_file_new_for_path(filename.c_str());
+    GFileInfo * file_info = g_file_query_info(file,
+        G_FILE_ATTRIBUTE_STANDARD_TYPE "," G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+        G_FILE_QUERY_INFO_NONE, NULL, &error);
+
+    /* Obtain unique pointer to file and file_info so they are destroyed when
+     * scope ends. */
+    GLibPointer file_pointer(file), file_info_pointer(file_info);
+
     if (error)
     {
         StatusBar::instance().displayMessage("Could not query file information");
         return;
     }
-    if (g_file_info_get_file_type(fileinfo) != G_FILE_TYPE_REGULAR)
+    if (g_file_info_get_file_type(file_info) != G_FILE_TYPE_REGULAR)
     {
         StatusBar::instance().displayMessage("File is not a regular file");
         return;
     }
 
-    auto filestream = autoUnref(g_mime_stream_file_new(fopen(filename.c_str(), "r")));
-    auto data = autoUnref(g_mime_data_wrapper_new_with_stream(filestream, GMIME_CONTENT_ENCODING_DEFAULT));
+    GMimeStream * file_stream = g_mime_stream_file_new(fopen(filename.c_str(), "r"));
+    GMimeDataWrapper * data = g_mime_data_wrapper_new_with_stream(file_stream,
+        GMIME_CONTENT_ENCODING_DEFAULT);
+
+    GLibPointer file_stream_pointer(file_stream), data_pointer(data);
 
     _parts.push_back(std::make_shared<Attachment>(data, g_file_get_basename(file),
-                                                  g_file_info_get_content_type(fileinfo),
-                                                  g_mime_stream_length(filestream)));
+        g_file_info_get_content_type(file_info), g_mime_stream_length(file_stream)));
 }
 
 void EmailEditView::removeSelectedAttachment()

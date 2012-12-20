@@ -136,23 +136,17 @@ template<typename Function>
     return OnScopeEnd<Function>(function);
 }
 
-template<typename T>
-class AutoUnref
+struct GLibDeleter
 {
-    T* _g_object;
+    constexpr GLibDeleter() = default;
 
-public:
-    AutoUnref(T* g_object) : _g_object(g_object) {}
-    ~AutoUnref() { if (_g_object) g_object_unref(_g_object); }
-
-    operator T*() { return _g_object; }
+    void operator()(void * object)
+    {
+        g_object_unref(object);
+    }
 };
 
-template<typename T>
-AutoUnref<T> autoUnref(T* g_object)
-{
-    return AutoUnref<T>(g_object);
-}
+typedef std::unique_ptr<void, GLibDeleter> GLibPointer;
 
 #endif
 
