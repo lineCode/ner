@@ -76,7 +76,9 @@ void EmailView::setEmail(const std::string & filename)
         if (not _parts.empty())
             _parts[0]->folded = false;
 
-        g_object_unref(mimePart);
+        g_object_unref(message);
+        g_object_unref(parser);
+        g_object_unref(stream);
     }
 }
 

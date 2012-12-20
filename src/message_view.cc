@@ -48,6 +48,8 @@ void MessageView::setMessage(const std::string & id)
 
     std::string filename = notmuch_message_get_filename(message);
 
+    notmuch_message_destroy(message);
+
     setEmail(filename);
 }
 

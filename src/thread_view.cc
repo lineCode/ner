@@ -97,10 +97,11 @@ void ThreadView::set_thread(const std::string & id)
     }
 
     notmuch_messages_destroy(messages);
-    notmuch_threads_destroy(threads);
-    notmuch_query_destroy(query);
 
     _messageCount = notmuch_thread_get_total_messages(thread);
+
+    notmuch_threads_destroy(threads);
+    notmuch_query_destroy(query);
 
     _selectedIndex = 0;
 
