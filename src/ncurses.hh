@@ -79,11 +79,17 @@ namespace NCurses
      */
     struct State
     {
-        Color color = Color::None;
-        attr_t attributes = 0;
+        State()
+            : color(Color::None), attributes(0), display_width(0),
+                max_width(std::numeric_limits<size_t>::max())
+        {
+        }
 
-        size_t max_width = std::numeric_limits<size_t>::max();
-        size_t display_width = 0;
+        Color color;
+        attr_t attributes;
+
+        size_t display_width;
+        size_t max_width;
     };
 
     /**

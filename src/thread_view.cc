@@ -216,7 +216,7 @@ uint32_t ThreadView::displayMessageLine(const Message & message,
         index = displayMessageLine(*reply, leading, (reply + 1) == e, index);
     }
 
-    leading.pop_back();
+    leading.resize(leading.size() - 1);
 
     return index;
 }
