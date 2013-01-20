@@ -36,3 +36,5 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile src/Makefile notmuch/Makefile])
 AC_OUTPUT
 
+dnl vim: fdm=marker et sw=4 sts=4 ts=8
+
