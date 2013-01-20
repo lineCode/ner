@@ -9,6 +9,7 @@ Makefile.in
 *.cache/
 
 .deps/
+.libs/
 
 /INSTALL
 /aclocal.m4

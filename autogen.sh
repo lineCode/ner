@@ -4,6 +4,7 @@ set -ex
 
 rm -rf autom4te.cache
 
+libtoolize
 aclocal -I m4 --force
 autoheader
 autoconf -f -W all
