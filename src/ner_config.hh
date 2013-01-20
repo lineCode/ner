@@ -42,7 +42,6 @@ class NerConfig
 
     private:
         NerConfig();
-        ~NerConfig();
 
         static const NerConfig * _instance;
 

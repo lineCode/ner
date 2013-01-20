@@ -65,10 +65,6 @@ NerConfig::NerConfig()
     _instance = this;
 }
 
-NerConfig::~NerConfig()
-{
-}
-
 void NerConfig::load()
 {
     /* Reset configuration to default values. */

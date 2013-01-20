@@ -73,7 +73,7 @@ void EmailView::setEmail(const std::string & filename)
 
         /* Locate plain text parts */
         processMimePart(mimePart, std::back_inserter(_parts));
-        if (not _parts.empty())
+        if (!_parts.empty())
             _parts[0]->folded = false;
 
         g_object_unref(message);

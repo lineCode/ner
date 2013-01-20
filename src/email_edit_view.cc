@@ -181,7 +181,7 @@ void EmailEditView::attach()
         return;
     }
 
-    GError* error = NULL;
+    GError * error = NULL;
     GFile * file = g_file_new_for_path(filename.c_str());
     GFileInfo * file_info = g_file_query_info(file,
         G_FILE_ATTRIBUTE_STANDARD_TYPE "," G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
@@ -215,7 +215,7 @@ void EmailEditView::attach()
 void EmailEditView::removeSelectedAttachment()
 {
     PartList::iterator selection = selectedPart();
-    if (dynamic_cast<Attachment*>(selection->get()))
+    if (dynamic_cast<Attachment *>(selection->get()))
         _parts.erase(selection);
 }
 
