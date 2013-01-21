@@ -114,28 +114,6 @@ template <class OutputIterator>
     }
 }
 
-template <typename Function>
-    class OnScopeEnd
-{
-    Function _function;
-
-public:
-    OnScopeEnd(Function function)
-        : _function(function)
-    {}
-
-    ~OnScopeEnd()
-    {
-        _function();
-    }
-};
-
-template<typename Function>
-    OnScopeEnd<Function> onScopeEnd(Function function)
-{
-    return OnScopeEnd<Function>(function);
-}
-
 struct GLibDeleter
 {
     constexpr GLibDeleter() = default;

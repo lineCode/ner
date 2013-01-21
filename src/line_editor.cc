@@ -49,7 +49,6 @@ bool LineEditor::line(std::string & result, const std::string & field,
     wrefresh(_window);
 
     curs_set(1);
-    auto resetCursor = onScopeEnd([] { curs_set(0); });
 
     int c;
 
@@ -134,6 +133,7 @@ bool LineEditor::line(std::string & result, const std::string & field,
             case ctrl('c'):
                 history.pop_back();
                 result = std::string();
+                curs_set(0);
                 return false;
             default:
                 position = response->insert(position, c) + 1;
@@ -147,6 +147,8 @@ bool LineEditor::line(std::string & result, const std::string & field,
     }
 
     result = *response;
+
+    curs_set(0);
 
     /* Don't keep history for empty fields. */
     if (field.empty())
