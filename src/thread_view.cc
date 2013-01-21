@@ -21,7 +21,6 @@
 #include <iterator>
 
 #include "thread_view.hh"
-#include "notmuch.hh"
 #include "util.hh"
 #include "colors.hh"
 #include "ncurses.hh"
@@ -29,6 +28,9 @@
 #include "message_view.hh"
 #include "status_bar.hh"
 #include "reply_view.hh"
+
+#include "notmuch/database.hh"
+#include "notmuch/exception.hh"
 
 using namespace Notmuch;
 
@@ -53,65 +55,51 @@ void ThreadView::update()
 
     Renderer r(_window);
 
-    display_message_tree(r, _topMessages, leading, index);
+    display_message_tree(r, _thread.tree, leading, index);
 }
 
 std::vector<std::string> ThreadView::status() const
 {
     std::ostringstream messagePosition;
 
-    messagePosition << "message " << (_selectedIndex + 1) << " of " << _messageCount;
+    messagePosition << "message " << (_selectedIndex + 1) << " of "
+        << _thread.total_messages;
 
     return std::vector<std::string>{
-        "thread:" + _id,
+        "thread:" + _thread.id,
         messagePosition.str()
     };
 }
 
 void ThreadView::set_thread(const std::string & id)
 {
-    _id = id;
+    Database database;
 
-    notmuch_query_t * query = notmuch_query_create(Database(), ("thread:" + id).c_str());
-    notmuch_threads_t * threads = notmuch_query_search_threads(query);
-    notmuch_thread_t * thread;
-    notmuch_messages_t * messages;
+    /* Don't care about thread metadata. */
+    _thread = database.find_thread(id, Thread::TreePart);
+    focus_first_unread();
+}
 
-    if (!notmuch_threads_valid(threads) || !(thread = notmuch_threads_get(threads)))
-    {
-        notmuch_threads_destroy(threads);
-        notmuch_query_destroy(query);
+void ThreadView::set_thread(const Thread & thread)
+{
+    _thread = thread;
+    focus_first_unread();
+}
 
-        throw InvalidThreadException(id);
-    }
-
-    for (messages = notmuch_thread_get_toplevel_messages(thread);
-        notmuch_messages_valid(messages);
-        notmuch_messages_move_to_next(messages))
-    {
-        _topMessages.push_back(notmuch_messages_get(messages));
-    }
-
-    notmuch_messages_destroy(messages);
-
-    _messageCount = notmuch_thread_get_total_messages(thread);
-
-    notmuch_threads_destroy(threads);
-    notmuch_query_destroy(query);
-
+void ThreadView::focus_first_unread()
+{
     _selectedIndex = 0;
+    int message_index = 0;
 
-    /* Find first unread message */
-    int messageIndex = 0;
-
-    for (Message::const_iterator message(_topMessages.rbegin(), _topMessages.rend()), e;
-        message != e; ++message, ++messageIndex)
+    for (auto & message : _thread.tree)
     {
-        if (message->tags.find("unread") != message->tags.end())
+        if (message.tags.find("unread") != message.tags.end())
         {
-            _selectedIndex = messageIndex;
+            _selectedIndex = message_index;
             break;
         }
+
+        ++message_index;
     }
 
     makeSelectionVisible();
@@ -133,7 +121,7 @@ void ThreadView::openSelectedMessage()
 
 const Message & ThreadView::selectedMessage() const
 {
-    Message::const_iterator message(_topMessages.rbegin(), _topMessages.rend());
+    auto message = _thread.tree.cbegin();
     std::advance(message, _selectedIndex);
     return *message;
 }
@@ -152,25 +140,28 @@ void ThreadView::reply()
 
 int ThreadView::lineCount() const
 {
-    return _messageCount;
+    return _thread.total_messages;
 }
 
 void ThreadView::display_message_tree(NCurses::Renderer & r,
-    const std::vector<Message> & messages, std::string & leading, unsigned & index) const
+    const Tree<Message> & tree, std::string & leading, unsigned & index) const
 {
     using namespace NCurses;
 
-    const Message * last_message = &messages.back();
+    auto last_node = &tree.children.back();
 
-    for (auto & message : messages)
+    for (auto & node : tree.children)
     {
-        bool last = &message == last_message;
+        bool last = &node == last_node;
 
         if (index >= _offset)
         {
             if (r.off_screen())
                 break;
 
+            const Message & message = node.value;
+
+            /* Draw message line */
             bool selected = r.row() + _offset == _selectedIndex;
             bool unread = message.tags.find("unread") != message.tags.end();
 
@@ -193,7 +184,7 @@ void ThreadView::display_message_tree(NCurses::Renderer & r,
 
             /* Date */
             r.skip(1);
-            r << styled(relativeTime(message.date), Color::ThreadViewDate);
+            r << styled(relative_time(message.date), Color::ThreadViewDate);
 
             /* Tags */
             r.set_color(Color::ThreadViewTags);
@@ -208,7 +199,7 @@ void ThreadView::display_message_tree(NCurses::Renderer & r,
         }
 
         leading.push_back(last ? ' ' : ACS_VLINE);
-        display_message_tree(r, message.replies, leading, ++index);
+        display_message_tree(r, node.branch, leading, ++index);
         leading.pop_back();
     }
 }

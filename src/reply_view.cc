@@ -23,27 +23,24 @@
 #include <strings.h>
 
 #include "reply_view.hh"
-#include "notmuch.hh"
 #include "util.hh"
 #include "message_part_text_visitor.hh"
+
+#include "notmuch/database.hh"
+#include "notmuch/message.hh"
 
 using namespace Notmuch;
 
 ReplyView::ReplyView(const std::string & id, const View::Geometry & geometry)
     : EmailEditView(geometry)
 {
-    notmuch_message_t * message;
+    Database database;
+    Message message = database.find_message(id);
+    database.close();
 
-    notmuch_database_find_message(Database(), id.c_str(), &message);
-
-    if (!message)
-        throw InvalidMessageException(id);
-
-    FILE * messageFile = fopen(notmuch_message_get_filename(message), "r");
+    FILE * messageFile = fopen(message.filename.c_str(), "r");
     GMimeStream * stream = g_mime_stream_file_new(messageFile);
     GMimeParser * parser = g_mime_parser_new_with_stream(stream);
-
-    notmuch_message_destroy(message);
 
     GMimeMessage * originalMessage = g_mime_parser_construct_message(parser);
     GMimeMessage * replyMessage = g_mime_message_new(true);

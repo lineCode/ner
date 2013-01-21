@@ -21,24 +21,25 @@
 #include <cstdio>
 #include <sstream>
 #include <iomanip>
+#include <chrono>
 
 #include "util.hh"
 
-std::string relativeTime(time_t time)
+std::string relative_time(const std::chrono::system_clock::time_point & time_point)
 {
     using namespace std::chrono;
 
     typedef duration<int, std::ratio<86400>> days;
 
     auto now = system_clock::now();
-    auto then = system_clock::from_time_t(time);
 
-    if (then > now)
+    if (time_point > now)
         return "the future";
 
+    time_t time = system_clock::to_time_t(time_point);
     time_t current_time = system_clock::to_time_t(now);
 
-    auto difference = now - then;
+    auto difference = now - time_point;
     struct tm local_time = *std::localtime(&time);
     struct tm current_local_time = *std::localtime(&current_time);
 

@@ -18,7 +18,6 @@
  */
 
 #include "thread_message_view.hh"
-#include "notmuch.hh"
 #include "colors.hh"
 
 const int threadViewHeight = 8;

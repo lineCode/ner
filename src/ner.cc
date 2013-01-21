@@ -33,8 +33,9 @@
 #include "view_view.hh"
 #include "compose_view.hh"
 #include "colors.hh"
-#include "notmuch.hh"
 #include "line_editor.hh"
+
+#include "notmuch/exception.hh"
 
 using namespace Notmuch;
 

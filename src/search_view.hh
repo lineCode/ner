@@ -26,7 +26,7 @@
 #include <condition_variable>
 
 #include "line_browser_view.hh"
-#include "notmuch.hh"
+#include "notmuch/thread.hh"
 
 class SearchView : public LineBrowserView
 {

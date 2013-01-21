@@ -35,7 +35,7 @@ constexpr char ctrl(char c)
     return c - 96;
 }
 
-std::string relativeTime(time_t time);
+std::string relative_time(const std::chrono::system_clock::time_point & time_point);
 
 std::string formatByteSize(long size);
 

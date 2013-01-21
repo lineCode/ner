@@ -21,10 +21,12 @@
 #include <cstring>
 
 #include "message_view.hh"
-#include "notmuch.hh"
 #include "colors.hh"
 #include "ncurses.hh"
 #include "status_bar.hh"
+
+#include "notmuch/database.hh"
+#include "notmuch/thread.hh"
 
 using namespace Notmuch;
 
@@ -39,18 +41,10 @@ MessageView::~MessageView()
 
 void MessageView::setMessage(const std::string & id)
 {
-    notmuch_message_t * message;
+    Database database;
 
-    notmuch_database_find_message(Database(), id.c_str(), &message);
-
-    if (!message)
-        throw InvalidMessageException(id);
-
-    std::string filename = notmuch_message_get_filename(message);
-
-    notmuch_message_destroy(message);
-
-    setEmail(filename);
+    Message message = database.find_message(id);
+    setEmail(message.filename);
 }
 
 // vim: fdm=syntax fo=croql et sw=4 sts=4 ts=8

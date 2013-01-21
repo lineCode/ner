@@ -12,8 +12,6 @@ ner_SOURCES = \
 	main.cc \
 	ner.cc ner.hh \
 	ner_config.cc ner_config.hh \
-	notmuch.cc notmuch.hh \
-	notmuch_iterator.cc notmuch_iterator.hh \
 	status_bar.cc status_bar.hh \
 	view_manager.cc view_manager.hh \
 	input_handler.cc input_handler.hh \

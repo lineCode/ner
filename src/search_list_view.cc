@@ -47,6 +47,7 @@ void SearchListView::update()
     using namespace NCurses;
 
     Renderer r(_window);
+    Notmuch::Database database;
 
     if (_offset > _searches.size())
         return;
@@ -69,10 +70,8 @@ void SearchListView::update()
         r.advance(searchTermsWidth);
 
         /* Number of Results */
-        notmuch_query_t * query = notmuch_query_create(Database(), search->query.c_str());
-        r << set_color(Color::SearchListViewResults)
-            << notmuch_query_count_messages(query) << " results";
-        notmuch_query_destroy(query);
+        Notmuch::Query query(search->query, &database);
+        r << set_color(Color::SearchListViewResults) << query.count_messages() << " results";
 
         r.add_cut_off_indicator();
     }

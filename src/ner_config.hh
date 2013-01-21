@@ -22,9 +22,9 @@
 
 #include <map>
 #include <string>
-#include <notmuch.h>
 
 #include "search_list_view.hh"
+#include "notmuch/query.hh"
 
 class NerConfig
 {
@@ -35,7 +35,7 @@ class NerConfig
 
         std::map<std::string, std::string> commands;
         std::vector<Search> searches;
-        notmuch_sort_t sort_mode;
+        Notmuch::SortMode sort_mode;
         bool refresh_view;
         bool add_signature_dashes;
         ColorMap color_map;

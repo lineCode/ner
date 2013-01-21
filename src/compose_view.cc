@@ -23,7 +23,6 @@
 #include <gmime/gmime.h>
 
 #include "compose_view.hh"
-#include "notmuch.hh"
 #include "ner_config.hh"
 
 bool ComposeFields::prompt(ComposeFields & fields)

@@ -30,8 +30,10 @@
 #include "util.hh"
 #include "colors.hh"
 #include "ncurses.hh"
-#include "notmuch.hh"
 #include "status_bar.hh"
+
+#include "notmuch/query.hh"
+#include "notmuch/exception.hh"
 
 using namespace Notmuch;
 
@@ -80,8 +82,7 @@ void SearchView::update()
     {
         bool selected = r.row() + _offset == _selectedIndex;
         bool unread = thread->tags.find("unread") != thread->tags.end();
-        bool completeMatch = thread->matchedMessages == thread->totalMessages;
-
+        bool completeMatch = thread->matched_messages == thread->total_messages;
 
         attr_t attributes = 0;
 
@@ -95,7 +96,7 @@ void SearchView::update()
 
         /* Date */
         r.set_max_width(newestDateWidth - 1);
-        r << styled(relativeTime(thread->newestDate), Color::SearchViewDate);
+        r << styled(relative_time(thread->date), Color::SearchViewDate);
         r.advance(newestDateWidth);
 
         /* Message Count */
@@ -104,7 +105,8 @@ void SearchView::update()
             : Color::SearchViewMessageCountPartial;
         r.set_max_width(messageCountWidth - 1);
         r << set_color() << '[' << set_color(message_count_color)
-            << thread->matchedMessages << '/' << thread->totalMessages << set_color() << ']';
+            << thread->matched_messages << '/' << thread->total_messages
+            << set_color() << ']';
         r.advance(messageCountWidth);
 
         /* Authors */
@@ -179,7 +181,7 @@ void SearchView::refreshThreads()
     std::string selectedId;
 
     if (!empty)
-        selectedId = (*(_threads.begin() + _selectedIndex)).id;
+        selectedId = _threads.at(_selectedIndex).id;
 
     _threads.clear();
 
@@ -236,28 +238,22 @@ int SearchView::lineCount() const
 
 void SearchView::collectThreads()
 {
+    Database database;
+    Query query(_searchTerms, &database);
+
+    query.set_sort_mode(NerConfig::instance().sort_mode);
+
     std::unique_lock<std::mutex> lock(_mutex);
     lock.unlock();
 
-    /* SearchView needs its own database connection  because it
-     * collects search results in the background (in a separate
-     * thread). */
-    Database database(NOTMUCH_DATABASE_MODE_READ_ONLY);
-
-    notmuch_query_t * query = notmuch_query_create(database, _searchTerms.c_str());
-    notmuch_query_set_sort(query, NerConfig::instance().sort_mode);
-    notmuch_threads_t * threadIterator;
-
-    for (threadIterator = notmuch_query_search_threads(query);
-        notmuch_threads_valid(threadIterator) && _collecting;
-        notmuch_threads_move_to_next(threadIterator))
+    for (const auto & thread : query.threads())
     {
+        if (!_collecting)
+            break;
+
         lock.lock();
 
-        notmuch_thread_t * thread = notmuch_threads_get(threadIterator);
         _threads.push_back(thread);
-        notmuch_thread_destroy(thread);
-
         _condition.notify_one();
 
         lock.unlock();
@@ -266,8 +262,6 @@ void SearchView::collectThreads()
     }
 
     _collecting = false;
-    notmuch_threads_destroy(threadIterator);
-    notmuch_query_destroy(query);
 
     /* For cases when there are no matching threads */
     _condition.notify_one();

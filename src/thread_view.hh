@@ -23,7 +23,9 @@
 #include <vector>
 
 #include "line_browser_view.hh"
-#include "notmuch.hh"
+
+#include "notmuch/thread.hh"
+#include "notmuch/message.hh"
 
 class ThreadView : public LineBrowserView
 {
@@ -36,6 +38,9 @@ class ThreadView : public LineBrowserView
         virtual std::vector<std::string> status() const;
 
         void set_thread(const std::string & id);
+        void set_thread(const Notmuch::Thread & thread);
+
+        void focus_first_unread();
 
         const Notmuch::Message & selectedMessage() const;
         virtual void openSelectedMessage();
@@ -49,11 +54,10 @@ class ThreadView : public LineBrowserView
 
     private:
         void display_message_tree(NCurses::Renderer & r,
-            const std::vector<Notmuch::Message> & tree, std::string & leading,
+            const Notmuch::Tree<Notmuch::Message> & tree, std::string & leading,
             unsigned & index) const;
 
-        std::vector<Notmuch::Message> _topMessages;
-        int _messageCount;
+        Notmuch::Thread _thread;
 };
 
 #endif

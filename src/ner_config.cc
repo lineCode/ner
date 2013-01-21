@@ -68,7 +68,7 @@ NerConfig::NerConfig()
 void NerConfig::load()
 {
     /* Reset configuration to default values. */
-    sort_mode = NOTMUCH_SORT_NEWEST_FIRST;
+    sort_mode = Notmuch::SortMode::NewestFirst;
     refresh_view = true;
     add_signature_dashes = true;
     commands = {
@@ -108,11 +108,11 @@ void NerConfig::load()
                 *sortModeNode >> sortModeStr;
 
                 if (sortModeStr == std::string("oldest_first"))
-                    sort_mode = NOTMUCH_SORT_OLDEST_FIRST;
+                    sort_mode = Notmuch::SortMode::OldestFirst;
                 else if (sortModeStr == std::string("message_id"))
-                    sort_mode = NOTMUCH_SORT_MESSAGE_ID;
+                    sort_mode = Notmuch::SortMode::MessageID;
                 else if (sortModeStr == std::string("newest_first"))
-                    sort_mode = NOTMUCH_SORT_NEWEST_FIRST;
+                    sort_mode = Notmuch::SortMode::NewestFirst;
                 else
                 {
                     /* FIXME: throw? */

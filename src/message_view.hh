@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "email_view.hh"
+#include "notmuch/message.hh"
 
 class MessageView : public EmailView
 {
