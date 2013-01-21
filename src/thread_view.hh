@@ -48,8 +48,9 @@ class ThreadView : public LineBrowserView
         std::string _id;
 
     private:
-        uint32_t displayMessageLine(const Notmuch::Message & message,
-            std::string & leading, bool last, int index);
+        void display_message_tree(NCurses::Renderer & r,
+            const std::vector<Notmuch::Message> & tree, std::string & leading,
+            unsigned & index) const;
 
         std::vector<Notmuch::Message> _topMessages;
         int _messageCount;

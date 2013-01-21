@@ -46,18 +46,14 @@ ThreadView::~ThreadView()
 
 void ThreadView::update()
 {
+    using namespace NCurses;
+
     std::string leading;
+    unsigned index = 0;
 
-    werase(_window);
+    Renderer r(_window);
 
-    int index = 0;
-
-    for (auto message = _topMessages.begin(), e = _topMessages.end();
-        message != e && index < getmaxy(_window) + _offset;
-        ++message)
-    {
-        index = displayMessageLine(*message, leading, (message + 1) == e, index);
-    }
+    display_message_tree(r, _topMessages, leading, index);
 }
 
 std::vector<std::string> ThreadView::status() const
@@ -159,67 +155,62 @@ int ThreadView::lineCount() const
     return _messageCount;
 }
 
-uint32_t ThreadView::displayMessageLine(const Message & message,
-    std::string & leading, bool last, int index)
+void ThreadView::display_message_tree(NCurses::Renderer & r,
+    const std::vector<Message> & messages, std::string & leading, unsigned & index) const
 {
     using namespace NCurses;
 
-    if (index >= _offset)
+    const Message * last_message = &messages.back();
+
+    for (auto & message : messages)
     {
-        bool selected = index == _selectedIndex;
-        bool unread = message.tags.find("unread") != message.tags.end();
+        bool last = &message == last_message;
 
-        Renderer r(_window, false);
-        r.move(index - _offset, 0);
-
-        attr_t attributes = 0;
-
-        if (selected)
-            attributes |= A_REVERSE;
-
-        if (unread)
-            attributes |= A_BOLD;
-
-        r.set_line_attributes(attributes);
-
-        r << set_color(Color::ThreadViewArrow) << acs << leading
-            << chchar(last ? ACS_LLCORNER : ACS_LTEE) << noacs << '>';
-
-        /* Sender */
-        r.skip(1);
-        r << set_color() << message.headers.find("From")->second;
-
-        /* Date */
-        r.skip(1);
-        r << styled(relativeTime(message.date), Color::ThreadViewDate);
-
-        /* Tags */
-        r.set_color(Color::ThreadViewTags);
-        for (auto & tag : message.tags)
+        if (index >= _offset)
         {
+            if (r.off_screen())
+                break;
+
+            bool selected = r.row() + _offset == _selectedIndex;
+            bool unread = message.tags.find("unread") != message.tags.end();
+
+            attr_t attributes = 0;
+
+            if (selected)
+                attributes |= A_REVERSE;
+
+            if (unread)
+                attributes |= A_BOLD;
+
+            r.set_line_attributes(attributes);
+
+            r << set_color(Color::ThreadViewArrow) << acs << leading
+                << chchar(last ? ACS_LLCORNER : ACS_LTEE) << noacs << '>';
+
+            /* Sender */
             r.skip(1);
-            r << tag;
+            r << set_color() << message.headers.find("From")->second;
+
+            /* Date */
+            r.skip(1);
+            r << styled(relativeTime(message.date), Color::ThreadViewDate);
+
+            /* Tags */
+            r.set_color(Color::ThreadViewTags);
+            for (auto & tag : message.tags)
+            {
+                r.skip(1);
+                r << tag;
+            }
+
+            r.add_cut_off_indicator();
+            r.next_line();
         }
 
-        r.add_cut_off_indicator();
+        leading.push_back(last ? ' ' : ACS_VLINE);
+        display_message_tree(r, message.replies, leading, ++index);
+        leading.pop_back();
     }
-
-    ++index;
-
-    leading.push_back(last ? ' ' : ACS_VLINE);
-
-    for (auto reply = message.replies.begin(), e = message.replies.end();
-        reply != e; ++reply)
-    {
-        if (index >= getmaxy(_window) + _offset)
-            break;
-
-        index = displayMessageLine(*reply, leading, (reply + 1) == e, index);
-    }
-
-    leading.resize(leading.size() - 1);
-
-    return index;
 }
 
 // vim: fdm=syntax fo=croql et sw=4 sts=4 ts=8
