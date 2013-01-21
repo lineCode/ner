@@ -20,7 +20,7 @@
 #include "identity_manager.hh"
 
 #include "maildir.hh"
-#include "notmuch.hh"
+#include "notmuch/config.hh"
 
 void operator>>(const YAML::Node & node, Identity & identity)
 {
@@ -82,18 +82,13 @@ void IdentityManager::load(const YAML::Node * node)
     else
     {
         Identity identity;
-        identity.name = g_key_file_get_string(Notmuch::config(), "user", "name", NULL);
-
-        identity.email = g_key_file_get_string(Notmuch::config(), "user", "primary_email", NULL);
+        identity.name = Notmuch::Config::instance().user.name;
+        identity.email = Notmuch::Config::instance().user.primary_email;
         _identities.insert(std::make_pair(identity.email, identity));
 
-        size_t addressesLength;
-        char ** addresses = g_key_file_get_string_list(Notmuch::config(), "user", "other_email",
-            &addressesLength, NULL);
-
-        for (int index = 0; index < addressesLength; ++index)
+        for (auto & address : Notmuch::Config::instance().user.other_email)
         {
-            identity.email = addresses[index];
+            identity.email = address;
             _identities.insert(std::make_pair(identity.email, identity));
         }
     }

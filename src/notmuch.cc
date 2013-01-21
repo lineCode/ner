@@ -21,8 +21,7 @@
 #include <glib-object.h>
 
 #include "notmuch.hh"
-
-GKeyFile * _config = NULL;
+#include "notmuch/config.hh"
 
 namespace Notmuch
 {
@@ -57,7 +56,8 @@ namespace Notmuch
     notmuch_database_t * Database::open(notmuch_database_mode_t mode)
     {
         notmuch_database_t * database;
-        notmuch_status_t status = notmuch_database_open(path(), mode, &database);
+        notmuch_status_t status = notmuch_database_open
+            (Notmuch::Config::instance().database.path.c_str(), mode, &database);
 
         if (status != NOTMUCH_STATUS_SUCCESS)
             throw std::runtime_error("Open database failed: "
@@ -149,27 +149,6 @@ namespace Notmuch
         }
 
         notmuch_messages_destroy(messages);
-    }
-
-    GKeyFile * config()
-    {
-        return _config;
-    }
-
-    void setConfig(const std::string & path)
-    {
-        if (_config)
-            g_object_unref(_config);
-
-        _config = g_key_file_new();
-
-        if (!g_key_file_load_from_file(_config, path.c_str(), G_KEY_FILE_NONE, NULL))
-            _config = NULL;
-    }
-
-    const char * path()
-    {
-        return g_key_file_get_string(_config, "database", "path", NULL);
     }
 }
 

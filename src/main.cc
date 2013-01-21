@@ -25,14 +25,12 @@
 #include <unistd.h>
 #include <gmime/gmime.h>
 
-#include "notmuch.hh"
 #include "ner.hh"
 #include "view_manager.hh"
 #include "search_list_view.hh"
 #include "identity_manager.hh"
 #include "ner_config.hh"
-
-const std::string notmuchConfigFile(".notmuch-config");
+#include "notmuch/config.hh"
 
 void terminate()
 {
@@ -69,13 +67,9 @@ int main(int argc, char * argv[])
 
     std::set_terminate(&terminate);
 
-    const char * environmentConfigPath = std::getenv("NOTMUCH_CONFIG");
-    std::string defaultConfigPath(std::string(std::getenv("HOME")) + "/" + notmuchConfigFile);
+    Notmuch::Config notmuch_config;
+    notmuch_config.load();
 
-    const std::string & configPath = (environmentConfigPath != NULL &&
-        access(environmentConfigPath, R_OK) == 0) ? environmentConfigPath : defaultConfigPath;
-
-    Notmuch::setConfig(configPath);
     NerConfig config;
     config.load();
 

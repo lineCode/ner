@@ -169,11 +169,6 @@ namespace Notmuch
         std::set<std::string> tags;
         std::vector<Message> replies;
     };
-
-    GKeyFile * config();
-    void setConfig(const std::string & path);
-
-    const char * path();
 };
 
 #endif
