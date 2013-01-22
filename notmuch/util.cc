@@ -23,11 +23,11 @@
 
 namespace Notmuch
 {
+    #define DEFINE_POINTER(name, destroy)                                   \
+        template <> const Deleter<notmuch_ ## name ## _t>::DeleteFunction   \
+        Deleter<notmuch_ ## name ## _t>::del = &destroy;
     #define DEFINE_POINTER_DESTROY(name) \
         DEFINE_POINTER(name, notmuch_ ## name ## _destroy)
-    #define DEFINE_POINTER(name, destroy)                                   \
-        template <> Deleter<notmuch_ ## name ## _t>::DeleteFunction         \
-        Deleter<notmuch_ ## name ## _t>::del = &destroy;
 
     DEFINE_POINTER_DESTROY(message)
     DEFINE_POINTER_DESTROY(messages)

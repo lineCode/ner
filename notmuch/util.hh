@@ -39,7 +39,7 @@ namespace Notmuch
         }
 
         typedef void (* DeleteFunction)(T * object);
-        static DeleteFunction del;
+        static const DeleteFunction del;
     };
 
     template <typename T>
