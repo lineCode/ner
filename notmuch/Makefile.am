@@ -13,6 +13,7 @@ libnotmuch_util_la_SOURCES = \
 	message.cc message.hh \
 	message_tree.cc message_tree.hh \
 	query.cc query.hh \
+	tag_operations.cc tag_operations.hh \
 	thread.cc thread.hh \
 	tree.hh \
 	util.cc util.hh

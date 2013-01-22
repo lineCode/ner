@@ -26,6 +26,7 @@
 #include <string>
 #include <notmuch.h>
 
+#include "notmuch/tag_operations.hh"
 #include "notmuch/util.hh"
 #include "notmuch/tree.hh"
 
@@ -52,6 +53,8 @@ namespace Notmuch
             std::string filename;
 
             std::map<CaseInsensitiveString, std::string> headers;
+
+            bool perform_tag_operations(const TagOperations & ops);
 
         private:
             Message(notmuch_message_t * message, Parts parts = AllParts);

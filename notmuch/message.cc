@@ -46,6 +46,63 @@ namespace Notmuch
         if (parts & FilenamePart)
             filename = notmuch_message_get_filename(message);
     }
+
+    bool Message::perform_tag_operations(const TagOperations & ops)
+    {
+        Database database(Database::Mode::ReadWrite);
+
+        notmuch_message_t * message;
+        notmuch_status_t status;
+
+        status = notmuch_database_find_message(database.get(),
+            id.c_str(), &message);
+        if (status != NOTMUCH_STATUS_SUCCESS)
+            return false;
+
+        if ((status = notmuch_message_freeze(message)) != NOTMUCH_STATUS_SUCCESS)
+            return false;
+
+        for (auto & op : ops)
+        {
+            switch (op.type)
+            {
+                case TagOperation::Add:
+                    notmuch_message_add_tag(message, op.tag.c_str());
+                    break;
+                case TagOperation::Remove:
+                    notmuch_message_remove_tag(message, op.tag.c_str());
+                    break;
+                case TagOperation::Clear:
+                    notmuch_message_remove_all_tags(message);
+                    break;
+            }
+        }
+
+        if ((status = notmuch_message_thaw(message)) != NOTMUCH_STATUS_SUCCESS)
+            return false;
+
+        database.close();
+
+        /* Now that the tag operations have been applied, we can apply these
+         * operations to our message structure. */
+        for (auto & op : ops)
+        {
+            switch (op.type)
+            {
+                case TagOperation::Add:
+                    tags.insert(op.tag);
+                    break;
+                case TagOperation::Remove:
+                    tags.erase(tags.find(op.tag));
+                    break;
+                case TagOperation::Clear:
+                    tags.clear();
+                    break;
+            }
+        }
+
+        return true;
+    }
 }
 
 // vim: fdm=syntax fo=croql et sw=4 sts=4 ts=8
