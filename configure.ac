@@ -18,18 +18,28 @@ AX_CXX_COMPILE_STDCXX_11
 PKG_PROG_PKG_CONFIG([0.9.0])
 
 dnl Check for libraries {{{
+
+# GLib
+PKG_CHECK_MODULES([glib], [glib-2.0])
+
+# GMime
 PKG_CHECK_MODULES([gmime], [gmime-2.6],,
     [PKG_CHECK_MODULES([gmime], [gmime-2.4])])
-PKG_CHECK_MODULES([glib], [glib-2.0])
-PKG_CHECK_MODULES([yaml_cpp], [yaml-cpp >= 0.3.0])
-AC_CHECK_LIB(notmuch, notmuch_database_open,,
-    [AC_MSG_ERROR([ner requires libnotmuch])])
-AC_CHECK_LIB(ncursesw, initscr,,
-    [AC_MSG_ERROR([ner requires ncursesw])])
 
+# Yaml-CPP
+PKG_CHECK_MODULES([yaml_cpp], [yaml-cpp >= 0.3.0])
+
+# NCurses
+AC_CHECK_LIB(ncursesw, initscr, [AC_SUBST([ncurses_LIBS], ["-lncursesw"])],
+    [AC_MSG_ERROR([ner requires ncursesw])])
 AC_CHECK_HEADERS(ncursesw/ncurses.h,,
     [AC_CHECK_HEADERS(ncurses/ncurses.h,,
         [AC_CHECK_HEADERS(ncurses.h)])])
+
+# Notmuch
+AC_CHECK_LIB(notmuch, notmuch_database_open, [AC_SUBST([notmuch_LIBS],
+    ["-lnotmuch"])], [AC_MSG_ERROR([ner requires libnotmuch])])
+
 dnl }}}
 
 AC_CONFIG_HEADERS([config.h])
