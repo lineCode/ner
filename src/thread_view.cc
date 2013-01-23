@@ -200,7 +200,11 @@ void ThreadView::display_message_tree(NCurses::Renderer & r,
 
         leading.push_back(last ? ' ' : ACS_VLINE);
         display_message_tree(r, node.branch, leading, ++index);
+#if defined __GNUC__ && !__GNUC_PREREQ(4, 7)
+        leading.resize(leading.size() -  1);
+#else
         leading.pop_back();
+#endif
     }
 }
 

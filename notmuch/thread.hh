@@ -61,7 +61,12 @@ namespace Notmuch
         private:
             Thread(notmuch_thread_t * thread, Parts parts = AllParts);
 
+
+#if defined __GNUC__ && !__GNUC_PREREQ(4, 7)
+        friend class Iterator<Thread, notmuch_threads_t>;
+#else
         friend ThreadIterator;
+#endif
     };
 }
 

@@ -123,9 +123,14 @@ namespace Notmuch
             }
 
         private:
-            typedef typename std::conditional<Const,
-                typename decltype(Tree<T>::children)::const_iterator,
-                typename decltype(Tree<T>::children)::iterator>::type Iterator;
+#if defined __GNUC__ && !__GNUC_PREREQ(4, 7)
+            /* Inflexible if the type for Tree<T>::children happens to change. */
+            typedef std::vector<typename tree_type::Node> children_type;
+#else
+            typedef decltype(tree_type::children) children_type;
+#endif
+            typedef typename std::conditional<Const, typename children_type::const_iterator,
+                typename children_type::iterator>::type Iterator;
             std::vector<std::pair<Iterator, Iterator>> _branches;
             bool _last_reply;
     };

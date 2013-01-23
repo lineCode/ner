@@ -43,8 +43,24 @@ namespace Notmuch
         static const DeleteFunction del;
     };
 
+#if defined __GNUC__ && !__GNUC_PREREQ(4, 7)
+    template <typename T>
+    struct Pointer : public std::unique_ptr<T, Deleter<T>>
+    {
+        Pointer()
+            : std::unique_ptr<T, Deleter<T>>()
+        {
+        }
+
+        Pointer(T * pointer)
+            : std::unique_ptr<T, Deleter<T>>(pointer)
+        {
+        }
+    };
+#else
     template <typename T>
     using Pointer = std::unique_ptr<T, Deleter<T>>;
+#endif
 
     template <typename T>
     Pointer<T> ptr(T * object)
