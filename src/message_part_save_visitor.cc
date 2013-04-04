@@ -39,18 +39,15 @@ void MessagePartSaveVisitor::visit(const Attachment & part)
         "save-attachment", part.filename) && !filename.empty())
     {
         struct stat dummy;
-        if (stat(filename.c_str(), &dummy) == 0)
+        std::string answer;
+        if (stat(filename.c_str(), &dummy) != 0 or
+            (StatusBar::instance().prompt(answer, "File exists, overwrite? [y,N]: ") and
+             (answer == "y" || answer == "Y")))
         {
-            std::string answer;
-
-            if (StatusBar::instance().prompt(answer, "File exists, overwrite? [y,N]: ")
-                && (answer == "y" || answer == "Y"))
-            {
-                FILE * file = fopen(filename.c_str(), "w");
-                GMimeStream * stream = g_mime_stream_file_new(file);
-                g_mime_data_wrapper_write_to_stream(part.data, stream);
-                g_object_unref(stream);
-            }
+            FILE * file = fopen(filename.c_str(), "w");
+            GMimeStream * stream = g_mime_stream_file_new(file);
+            g_mime_data_wrapper_write_to_stream(part.data, stream);
+            g_object_unref(stream);
         }
     }
 }
