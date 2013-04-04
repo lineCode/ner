@@ -27,7 +27,7 @@ PKG_CHECK_MODULES([gmime], [gmime-2.6],,
     [PKG_CHECK_MODULES([gmime], [gmime-2.4])])
 
 # Yaml-CPP
-PKG_CHECK_MODULES([yaml_cpp], [yaml-cpp >= 0.3.0])
+PKG_CHECK_MODULES([yaml_cpp], [yaml-cpp >= 0.5.0])
 
 # NCurses
 AC_CHECK_LIB(ncursesw, initscr, [AC_SUBST([ncurses_LIBS], ["-lncursesw"])],

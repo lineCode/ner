@@ -27,30 +27,45 @@
 
 const std::string nerConfigFile(".ner.yaml");
 
-void operator>>(const YAML::Node & node, ColorPair & color_pair)
+namespace YAML
 {
-    static const std::map<std::string, int> ncursesColors = {
-        { "black",      COLOR_BLACK },
-        { "red",        COLOR_RED },
-        { "green",      COLOR_GREEN },
-        { "yellow",     COLOR_YELLOW },
-        { "blue",       COLOR_BLUE },
-        { "magenta",    COLOR_MAGENTA },
-        { "cyan",       COLOR_CYAN },
-        { "white",      COLOR_WHITE }
-    };
 
-    std::string foreground = node.FindValue("fg")->to<std::string>();
-    std::string background = node.FindValue("bg")->to<std::string>();
-
-    color_pair.foreground = ncursesColors.at(foreground);
-    color_pair.background = ncursesColors.at(background);
-}
-
-void operator>>(const YAML::Node & node, Search & search)
+template<>
+struct convert<ColorPair>
 {
-    node.FindValue("name")->Read(search.name);
-    node.FindValue("query")->Read(search.query);
+    static bool decode(const YAML::Node & node, ColorPair & color_pair)
+    {
+        static const std::map<std::string, int> ncursesColors = {
+            { "black",      COLOR_BLACK },
+            { "red",        COLOR_RED },
+            { "green",      COLOR_GREEN },
+            { "yellow",     COLOR_YELLOW },
+            { "blue",       COLOR_BLUE },
+            { "magenta",    COLOR_MAGENTA },
+            { "cyan",       COLOR_CYAN },
+            { "white",      COLOR_WHITE }
+        };
+
+        std::string foreground = node["fg"].as<std::string>();
+        std::string background = node["bg"].as<std::string>();
+
+        color_pair.foreground = ncursesColors.at(foreground);
+        color_pair.background = ncursesColors.at(background);
+        return true;
+    }
+};
+
+template<>
+struct convert<Search>
+{
+    static bool decode(const YAML::Node & node, Search & search)
+    {
+        search.name = node["name"].as<std::string>();
+        search.query = node["query"].as<std::string>();
+        return true;
+    }
+};
+
 }
 
 const NerConfig * NerConfig::_instance = nullptr;
@@ -79,33 +94,24 @@ void NerConfig::load()
     color_map = defaultColorMap;
 
     std::string configPath(std::string(getenv("HOME")) + "/" + nerConfigFile);
-    std::ifstream configFile(configPath.c_str());
+    YAML::Node document = YAML::LoadFile(configPath);
 
-    YAML::Parser parser(configFile);
-
-    YAML::Node document;
-    parser.GetNextDocument(document);
-
-    if (document.Type() != YAML::NodeType::Null)
+    if (document)
     {
         /* Identities */
-        IdentityManager::instance().load(document.FindValue("identities"));
+        IdentityManager::instance().load(document["identities"]);
 
-        const YAML::Node * defaultIdentity = document.FindValue("default_identity");
-        if (defaultIdentity)
-            IdentityManager::instance().setDefaultIdentity(defaultIdentity->to<std::string>());
+        if (auto defaultIdentity = document["default_identity"])
+            IdentityManager::instance().setDefaultIdentity(defaultIdentity.as<std::string>());
 
         /* General stuff */
-        auto general = document.FindValue("general");
-
-        if (general)
+        if (auto general = document["general"])
         {
-            auto sortModeNode = general->FindValue("sort_mode");
+            auto sortModeNode = general["sort_mode"];
 
             if (sortModeNode)
             {
-                std::string sortModeStr;
-                *sortModeNode >> sortModeStr;
+                std::string sortModeStr = sortModeNode.as<std::string>();
 
                 if (sortModeStr == std::string("oldest_first"))
                     sort_mode = Notmuch::SortMode::OldestFirst;
@@ -119,26 +125,22 @@ void NerConfig::load()
                 }
             }
 
-            auto refreshViewNode = general->FindValue("refresh_view");
+            ;
 
-            if (refreshViewNode)
-                *refreshViewNode >> refresh_view;
+            if (auto refreshViewNode = general["refresh_view"])
+                refresh_view = refreshViewNode.as<bool>();
 
-            auto addSigDashesNode = general->FindValue("add_sig_dashes");
-
-            if (addSigDashesNode)
-                *addSigDashesNode >> add_signature_dashes;
+            if (auto addSigDashesNode = general["add_sig_dashes"])
+                add_signature_dashes = addSigDashesNode.as<bool>();
         }
 
         /* Commands */
-        const YAML::Node * commands_node = document.FindValue("commands");
-        if (commands_node)
-            commands_node->Read(commands);
+        if (auto commands_node = document["commands"])
+            commands = commands_node.as<decltype(commands)>();
 
         /* Saved Searches */
-        const YAML::Node * searches_node = document.FindValue("searches");
-        if (searches_node)
-            searches_node->Read(searches);
+        if (auto searches_node = document["searches"])
+            searches = searches_node.as<decltype(searches)>();
         else
             searches = {
                 { "New", "tag:inbox and tag:unread" },
@@ -147,8 +149,7 @@ void NerConfig::load()
             };
 
         /* Colors */
-        const YAML::Node * colors = document.FindValue("colors");
-        if (colors)
+        if (auto colors = document["colors"])
         {
             std::map<std::string, Color> colorNames = {
                 /* General */
@@ -201,8 +202,8 @@ void NerConfig::load()
                 { "citation_level_4",           Color::CitationLevel4 }
             };
 
-            for (auto name = colors->begin(), e = colors->end(); name != e; ++name)
-                color_map[colorNames.at(name.first().to<std::string>())] = name.second().to<ColorPair>();
+            for (auto name = colors.begin(), e = colors.end(); name != e; ++name)
+                color_map[colorNames.at(name->first.as<std::string>())] = name->second.as<ColorPair>();
         }
     }
 }

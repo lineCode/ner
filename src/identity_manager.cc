@@ -22,36 +22,38 @@
 #include "maildir.hh"
 #include "notmuch/config.hh"
 
-void operator>>(const YAML::Node & node, Identity & identity)
+namespace YAML
 {
-    node["name"] >> identity.name;
-    node["email"] >> identity.email;
 
-    /* Optional entries */
-    const YAML::Node * signatureNode = node.FindValue("signature");
-    const YAML::Node * sendNode = node.FindValue("send");
-    const YAML::Node * sentMailNode = node.FindValue("sent_mail");
-
-    if (signatureNode)
-        *signatureNode >> identity.signaturePath;
-    else
-        identity.signaturePath.clear();
-
-    if (sendNode)
-        *sendNode >> identity.sendCommand;
-
-    std::string tagPrefix = "tag:the-ner.org,2010:";
-
-    identity.sentMail.reset();
-
-    if (sentMailNode)
+template<>
+struct convert<Identity>
+{
+    static bool decode(const YAML::Node & node, Identity & identity)
     {
-        if (sentMailNode->Tag() == tagPrefix + "maildir")
+         identity.name = node["name"].as<std::string>();
+         identity.email = node["email"].as<std::string>();
+
+        if (node["signature"])
+            identity.signaturePath = node["signature"].as<std::string>();
+        else
+            identity.signaturePath.clear();
+
+        if (node["send"])
+            identity.sendCommand = node["send"].as<std::string>();
+
+        std::string tagPrefix = "tag:the-ner.org,2010:";
+
+        identity.sentMail.reset();
+        auto& sentMailNode = node["sent_mail"];
+        if (sentMailNode and sentMailNode.Tag() == tagPrefix + "maildir")
         {
-            std::string sentMailPath = sentMailNode->to<std::string>();
+            std::string sentMailPath = sentMailNode.as<std::string>();
             identity.sentMail = std::make_shared<Maildir>(sentMailPath);
         }
+        return true;
     }
+};
+
 }
 
 IdentityManager & IdentityManager::instance()
@@ -72,12 +74,12 @@ IdentityManager::~IdentityManager()
 {
 }
 
-void IdentityManager::load(const YAML::Node * node)
+void IdentityManager::load(const YAML::Node & node)
 {
     _identities.clear();
 
     if (node)
-        (*node) >> _identities;
+        _identities = node.as<decltype(_identities)>();
     /* Otherwise, guess identities from notmuch config */
     else
     {
